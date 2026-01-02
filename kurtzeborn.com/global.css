@@ -1,0 +1,225 @@
+﻿/* Reset Styles */
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: normal;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: eurostile, sans-serif;
+	vertical-align: baseline;
+}
+
+:focus {
+	outline: 0;
+}
+
+body {
+	line-height: 1;
+	color: black;
+	background: black;
+}
+
+ol, ul {
+	list-style: none;
+}
+
+/* Borders */
+
+h1, .content, .content-border, .nav {
+	border: solid black 4px;
+}
+
+/* Colors */
+
+.content a {
+	color: darkslategray;
+}
+
+a:focus, a:hover {
+	background-color: rgba(210, 255, 0, 0.50);
+}
+
+.nav a {
+	color: black;
+}
+
+h1 {
+	color: white;
+}
+
+.content {
+	background-color: lightgoldenrodyellow;
+}
+
+.content-border {
+	background-color: darkgoldenrod;
+	opacity: 0.8;
+}
+
+.heading {
+	background-color: darkkhaki;
+}
+
+.content-border h2 {
+	color: white;
+}
+
+.nav {
+	background-color: white;
+	opacity: 0.9;
+	word-wrap: break-word;
+}
+
+/* Float */
+.heading {
+	float: left;
+}
+
+/* Font Size */
+
+h1 {
+	font-size: 400%;
+}
+
+.content ul li.copyright {
+	font-size: 63.5%;
+}
+
+.copyright {
+	font-size: 63.5%;
+}
+
+.nav ul li {
+	font-size: 112.5%;
+}
+
+.nav-link {
+	font-size: 75%;
+}
+
+.me {
+	font-size: 87.5%;
+}
+
+/* Margin */
+
+.content-border {
+	margin-left: 7%;
+	margin-top: .5em;
+	margin-bottom: .5em;
+}
+
+.background {
+	margin-top: -.5em;
+}
+
+.heading {
+	margin: .5em;
+	margin-left:3%;
+}
+
+.nav, .nav ul li ul {
+	margin-left: 1em;
+}
+
+.content-border h2 {
+	margin-top: -.5em;
+}
+
+/* Padding */
+
+.content-border, .content, .nav, .content ul {
+	padding: 1em;
+}
+
+.content {
+	clear:both;
+}
+
+.heading h1 {
+	padding: .2em;
+}
+
+.nav ul {
+	padding-bottom: 1em;
+}
+
+.nav li {
+	padding-bottom: .5em;
+}
+
+.nav ul.nav-wrap {
+	padding-bottom: 0em;
+}
+
+.content-border h2 {
+	padding-right: 1em;
+}
+
+.content p {
+	padding-bottom: 1em;
+}
+/* Position */
+
+.heading, .content-nav, .content {
+	position: relative;
+}
+
+.nav {
+	position: absolute;
+}
+
+.background {
+	position: fixed;
+	left: 0;
+}
+
+.nav {
+	top: 7.5em;
+}
+/* Text Align */
+
+.content-border h2 {
+	text-align: left;
+}
+
+/* Width */
+.content {
+	width: 25em;
+}
+
+.content-border {
+	width: 27.5em;
+}
+
+.background {
+	min-width: 1500px;
+}
+/* Z-Index */
+
+.heading {
+	z-index: 5;
+}
+
+.background {
+	z-index: -1;
+}
+
+/* Align */
+.heading h1 {
+	text-align: center;
+}
+
+.copyright {
+	float: right;
+}
