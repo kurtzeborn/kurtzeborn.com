@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kurtzeborn Family</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		
+		body {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			min-height: 100vh;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding: 20px;
+		}
+		
+		.container {
+			max-width: 800px;
+			width: 100%;
+		}
+		
+		h1 {
+			text-align: center;
+			color: white;
+			font-size: 3em;
+			margin-bottom: 10px;
+			text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+		}
+		
+		.subtitle {
+			text-align: center;
+			color: rgba(255,255,255,0.9);
+			font-size: 1.2em;
+			margin-bottom: 50px;
+		}
+		
+		.cards {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 30px;
+			margin-top: 30px;
+		}
+		
+		.card {
+			background: white;
+			border-radius: 15px;
+			padding: 40px;
+			text-align: center;
+			box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+			cursor: pointer;
+			text-decoration: none;
+			color: inherit;
+			display: block;
+		}
+		
+		.card:hover {
+			transform: translateY(-10px);
+			box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+		}
+		
+		.card-icon {
+			font-size: 4em;
+			margin-bottom: 20px;
+		}
+		
+		.card h2 {
+			color: #333;
+			margin-bottom: 15px;
+			font-size: 1.8em;
+		}
+		
+		.card p {
+			color: #666;
+			line-height: 1.6;
+		}
+		
+		.card-game {
+			background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+		}
+		
+		.card-game h2,
+		.card-game p {
+			color: white;
+		}
+		
+		.card-profile {
+			background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+		}
+		
+		.card-profile h2,
+		.card-profile p {
+			color: white;
+		}
+		
+		footer {
+			text-align: center;
+			color: rgba(255,255,255,0.8);
+			margin-top: 50px;
+			font-size: 0.9em;
+		}
+		
+		@media (max-width: 600px) {
+			h1 {
+				font-size: 2em;
+			}
+			
+			.cards {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Kurtzeborn Family</h1>
+		<p class="subtitle">Welcome to our corner of the web</p>
+		
+		<div class="cards">
+			<a href="game/" class="card card-game">
+				<div class="card-icon">🏍️</div>
+				<h2>Motorcycle Runner</h2>
+				<p>Play an endless runner game inspired by Chrome's T-Rex. Jump and duck to avoid obstacles!</p>
+			</a>
+			
+			<a href="scott.kurtzeborn.com/" class="card card-profile">
+				<div class="card-icon">👤</div>
+				<h2>Scott's Profile</h2>
+				<p>Learn more about Scott Kurtzeborn - work history, interests, and contact information.</p>
+			</a>
+		</div>
+		
+		<footer>
+			<p>&copy; 2024-2026 Kurtzeborn Family</p>
+		</footer>
+	</div>
+</body>
+</html>
