@@ -32,9 +32,13 @@ Before submitting changes:
 - [ ] All magic numbers moved to `CONFIG`
 - [ ] No duplicated logic (extracted to functions)
 - [ ] Complex calculations extracted to parameterized functions
+- [ ] No duplicated configuration data (single source of truth)
+- [ ] Sprite dimensions computed from sprite data (not hardcoded)
+- [ ] Hitbox calculations use utility functions (no duplicated offset formulas)
+- [ ] Sprite rendering uses cached canvases for performance
 - [ ] Utility functions created for repeated patterns
 - [ ] Game state properly cleared in `startGame()`
-- [ ] Colors use `COLORS` constants
+- [ ] Colors use `COLORS` constants (no hardcoded hex values)
 - [ ] New sprites use indexed color palette
 - [ ] All control flow has proper return statements
 - [ ] preventDefault() added for game input keys
@@ -45,6 +49,7 @@ Before submitting changes:
 - [ ] localStorage values properly parsed as integers
 - [ ] Visual feedback for new game events
 - [ ] Helper functions for random selection and calculations
+- [ ] Draw order correct (background → road → particles → player → obstacles → UI)
 
 ---
 
@@ -637,6 +642,168 @@ flyingInterval = calculateSpawnInterval(
 
 ---
 
+### 14. **Duplicated Configuration Data**
+
+**❌ Bad:**
+```javascript
+// game.js
+const COLORS = {
+    WHEEL: '#555555',
+    BODY: '#333333',
+    HELMET: '#ff0000'
+};
+
+// sprites.js
+const SPRITE_PALETTE = [
+    null,           // 0 - transparent
+    '#2d2d2d',     // 1 - wheels (different value!)
+    '#333333',     // 2 - body (duplicated!)
+    '#ff0000'      // 5 - helmet (duplicated!)
+];
+```
+
+**✅ Good:**
+```javascript
+// sprites.js - single source of truth
+const COLORS = {
+    WHEEL: '#cccccc',
+    BODY: '#333333',
+    HELMET: '#ff0000'
+};
+
+const SPRITE_PALETTE = [
+    COLORS.TRANSPARENT,  // 0 - transparent
+    COLORS.WHEEL,        // 1 - wheels
+    COLORS.BODY,         // 2 - motorcycle body
+    COLORS.HELMET        // 5 - helmet red
+];
+
+// game.js
+// Note: COLORS defined in sprites.js
+ctx.fillStyle = COLORS.GROUND_LINE;
+```
+
+**Why:** Multiple sources of truth create confusion and bugs. When you need to change a color, you shouldn't have to hunt through multiple files. Having SPRITE_PALETTE reference COLORS ensures consistency and makes updates easier.
+
+---
+
+### 15. **Hardcoded Sprite Dimensions Instead of Computing from Sprites**
+
+**❌ Bad:**
+```javascript
+const obstacleTypes = [
+    { sprite: 'CACTUS_SMALL', width: 27, height: 48, type: 'cactus' },   // 9px * 3 scale = 27, 16px * 3 = 48
+    { sprite: 'CACTUS_MEDIUM', width: 33, height: 54, type: 'cactus' },  // 11px * 3 = 33, 18px * 3 = 54
+    { sprite: 'CACTUS_TALL', width: 45, height: 66, type: 'cactus' }     // 15px * 3 = 45, 22px * 3 = 66
+];
+
+const flyingObstacleConfig = {
+    width: 36,      // Manually calculated
+    height: 21,     // Manually calculated
+    heightVariations: [-100, -120, -140]
+};
+
+function drawGround() {
+    ctx.lineWidth = 40;  // Magic number
+    ctx.strokeStyle = '#ffffff';  // Hardcoded color
+}
+```
+
+**✅ Good:**
+```javascript
+// Dimensions computed automatically from sprite data
+function getObstacleTypes() {
+    return [
+        { sprite: 'CACTUS_SMALL', ...getSpriteDimensions(SPRITES.CACTUS_SMALL), type: 'cactus' },
+        { sprite: 'CACTUS_MEDIUM', ...getSpriteDimensions(SPRITES.CACTUS_MEDIUM), type: 'cactus' },
+        { sprite: 'CACTUS_TALL', ...getSpriteDimensions(SPRITES.CACTUS_TALL), type: 'cactus' }
+    ];
+}
+const obstacleTypes = getObstacleTypes();
+
+const flyingObstacleConfig = {
+    ...getSpriteDimensions(SPRITES.BIRD_UP),  // Computed automatically
+    heightVariations: [-100, -120, -140]
+};
+
+// Add configuration constants
+const CONFIG = {
+    GROUND_ROAD_WIDTH: 40,
+    BIRD_WING_FLAP_FRAME_INTERVAL: 10
+};
+
+// Add named color
+const COLORS = {
+    CENTER_LINE: '#ffffff'
+};
+
+function drawGround() {
+    ctx.lineWidth = CONFIG.GROUND_ROAD_WIDTH;
+    ctx.strokeStyle = COLORS.CENTER_LINE;
+}
+```
+
+**Why:** Hardcoded dimensions become outdated when sprites change. Computing dimensions from sprite data ensures they always match. Named constants make values self-documenting and easier to tune. If you change a sprite's size, all hitboxes and rendering automatically adjust without hunting down magic numbers throughout the code.
+
+---
+
+### 16. **Hardcoded Hitbox Percentages and Duplicated Offset Calculations**
+
+**❌ Bad:**
+```javascript
+// Hardcoded 0.7 multiplier repeated 8 times!
+const normalHitbox = {
+    width: normalDims.width * 0.7,
+    height: normalDims.height * 0.7,
+    offsetX: (normalDims.width - normalDims.width * 0.7) / 2,
+    offsetY: (normalDims.height - normalDims.height * 0.7) / 2
+};
+const duckHitbox = {
+    width: duckDims.width * 0.7,
+    height: duckDims.height * 0.7,
+    offsetX: (duckDims.width - duckDims.width * 0.7) / 2,
+    offsetY: (duckDims.height - duckDims.height * 0.7) / 2
+};
+
+function drawGround() {
+    ctx.lineWidth = 3;  // What is 3? Center line width?
+}
+```
+
+**✅ Good:**
+```javascript
+// Add configuration constant
+const CONFIG = {
+    HITBOX_SIZE_RATIO: 0.7,  // Hitboxes are 70% of sprite size for forgiving collision
+    CENTER_LINE_WIDTH: 3,
+    // ...
+};
+
+// Create utility function to eliminate duplication
+function calculateHitbox(spriteDims, sizeRatio = CONFIG.HITBOX_SIZE_RATIO) {
+    const hitboxWidth = spriteDims.width * sizeRatio;
+    const hitboxHeight = spriteDims.height * sizeRatio;
+    return {
+        width: hitboxWidth,
+        height: hitboxHeight,
+        offsetX: (spriteDims.width - hitboxWidth) / 2,
+        offsetY: (spriteDims.height - hitboxHeight) / 2
+    };
+}
+
+// Use utility function
+const normalHitbox = calculateHitbox(normalDims);
+const duckHitbox = calculateHitbox(duckDims);
+
+function drawGround() {
+    ctx.lineWidth = CONFIG.CENTER_LINE_WIDTH;
+}
+```
+
+**Why:** Repeated magic numbers make the code harder to tune and maintain. If you want to adjust hitbox sizes for difficulty balancing, you should change it in one place. Extracting the calculation to a utility function eliminates duplication and makes the code self-documenting. Named constants explain *what* the number represents and *why* it exists.
+
+---
+
 ## History of Refactorings
 
 This section documents the evolution of the codebase through major refactoring efforts.
@@ -678,4 +845,47 @@ This section documents the evolution of the codebase through major refactoring e
 - ✅ Extracted `isObstacleTooClose()` helper for collision prevention checks
 - ✅ Moved all spawn magic numbers to CONFIG (OBSTACLE_RETRY_DELAY, interval spacings, etc.)
 - ✅ Simplified spawn logic from ~90 lines to ~55 lines through helper functions
+
+### Fifth Refactoring (Visual Improvements & Configuration Cleanup)
+- ✅ Improved road graphics (40px wide road with white center line for realistic appearance)
+- ✅ Fixed wheel visibility (changed color from dark gray to light gray #cccccc)
+- ✅ Consolidated COLORS object into `sprites.js` as single source of truth
+- ✅ Updated SPRITE_PALETTE to reference COLORS constants instead of hardcoded values
+- ✅ Added CENTER_LINE color constant (replaced hardcoded '#ffffff')
+- ✅ Fixed draw order issues (motorcycle now renders above road, below obstacles)
+- ✅ Corrected waiting screen z-ordering (ground rendered before motorcycle)
+- ✅ Added GROUND_ROAD_WIDTH config constant (replaced magic number 40)
+- ✅ Added BIRD_WING_FLAP_FRAME_INTERVAL constant (replaced magic number 10)
+- ✅ Replaced hardcoded obstacle dimensions with `getSpriteDimensions()` calculations
+- ✅ Created `getObstacleTypes()` function to compute dimensions from sprites automatically
+- ✅ Eliminated hardcoded width/height calculations for flying obstacles
+- ✅ Documented mistake #14: "Duplicated Configuration Data" with before/after examples
+
+**Key Improvement:** This refactoring eliminated all remaining magic numbers related to visual rendering and ensured sprite dimensions are calculated programmatically. If sprite sizes change, all obstacle dimensions now update automatically without code changes.
+
+### Sixth Refactoring (Performance & Polish)
+- ✅ Implemented sprite caching system using Map and offscreen canvases
+- ✅ Added horizontal flip support to sprite rendering with cache optimization
+- ✅ Pre-cached motorcycle hitbox calculations (normalHitbox, duckHitbox)
+- ✅ Optimized particle rendering using globalAlpha instead of string operations
+- ✅ Batched ground rendering (single beginPath/stroke for center line dashes)
+- ✅ Added random horizontal flipping to cacti for visual variety
+- ✅ Reduced CACTUS_SMALL height from 16 to 12 rows for better gameplay
+- ✅ Added CACTUS_EXTRA_TALL (28 rows) for increased obstacle variety
+- ✅ Increased SAFE_DISTANCE_BIRD_CACTUS from 200 to 300 pixels
+- ✅ Increased OBSTACLE_RETRY_DELAY from 10 to 20 frames
+- ✅ Improved scoring system: 1 point per 5 frames + 50/75 point bonuses
+- ✅ Added landing animation feature (shows duck sprite for 8 frames on landing)
+- ✅ Fixed landing animation sprite alignment using Y-offset calculation
+- ✅ Added CENTER_LINE_WIDTH config constant (replaced magic number 3)
+- ✅ Added HITBOX_SIZE_RATIO config constant (replaced hardcoded 0.7)
+- ✅ Created `calculateHitbox()` utility function to eliminate duplicated offset calculations
+- ✅ Removed unused `getRandomInt()` function
+- ✅ Documented mistake #15: "Hardcoded Sprite Dimensions"
+
+**Key Improvements:** 
+- **Performance:** Sprite caching dramatically reduces pixel-by-pixel drawing operations every frame. Sprites are now rendered once to offscreen canvases and reused via `drawImage()`.
+- **Code Quality:** Eliminated all remaining magic numbers (hitbox ratio, line widths). All tunable values now in CONFIG.
+- **Visual Polish:** Landing animation adds visual feedback when motorcycle touches ground. Random cactus flipping adds variety without new assets.
+- **Gameplay Balance:** Adjusted obstacle spawning distances and scoring to improve pacing and player feedback.
 
