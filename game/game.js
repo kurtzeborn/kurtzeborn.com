@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
-// Version 0.7
+// Version 0.8
 
-const VERSION = 'v0.7';
+const VERSION = 'v0.8';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -15,9 +15,18 @@ const instructionsEl = document.getElementById('instructions');
 
 // Game configuration constants
 const CONFIG = {
+    // Speed and difficulty
     INITIAL_SPEED: 6,
     SPEED_INCREMENT: 0.5,
     SPEED_INCREASE_INTERVAL: 300,
+    
+    // Point values
+    SURVIVAL_POINTS_INTERVAL: 5, // Award 1 point every N frames
+    VEHICLE_POINTS: 50,
+    RIDEABLE_VEHICLE_POINTS: 100,
+    FLYING_OBSTACLE_POINTS: 75,
+    
+    // Spawn timing
     OBSTACLE_MIN_INTERVAL: 60,
     OBSTACLE_MAX_INTERVAL: 120,
     OBSTACLE_INTERVAL_DECREASE_RATE: 0.5,
@@ -25,10 +34,7 @@ const CONFIG = {
     FLYING_OBSTACLE_MIN_INTERVAL: 100,
     FLYING_OBSTACLE_MAX_INTERVAL: 200,
     FLYING_OBSTACLE_MIN_SCORE: 100,
-    VEHICLE_POINTS: 50,
-    RIDEABLE_VEHICLE_POINTS: 100,
     RIDEABLE_VEHICLE_MIN_SCORE: 300,
-    FLYING_OBSTACLE_POINTS: 75,
     FLYING_OBSTACLE_SPEED_MULTIPLIER: 1.2,
     GROUND_ROAD_WIDTH: 40,
     GROUND_DASH_SPACING: 40,
@@ -165,6 +171,7 @@ let nextGroundObstacleFrame = 0;
 let nextFlyingObstacleFrame = 0;
 let groundObstacleInterval = CONFIG.OBSTACLE_MAX_INTERVAL;
 let flyingObstacleInterval = CONFIG.FLYING_OBSTACLE_MAX_INTERVAL;
+let lastConvoyEndX = -1000; // Track the end position of the last convoy
 
 // Motorcycle object
 const motorcycle = {
@@ -364,7 +371,17 @@ function calculateSpawnInterval(minInterval, maxInterval, minCap, minSpacing) {
 function isObstacleTooClose(obstacleArray) {
     if (obstacleArray.length === 0) return false;
     const lastObstacle = obstacleArray[obstacleArray.length - 1];
-    return canvas.width - lastObstacle.x < CONFIG.SAFE_DISTANCE_BIRD_VEHICLE;
+    const lastObstacleEnd = lastObstacle.x + lastObstacle.width;
+    
+    // Check distance from last obstacle
+    const obstacleDistance = canvas.width - lastObstacleEnd;
+    if (obstacleDistance < CONFIG.SAFE_DISTANCE_BIRD_VEHICLE) return true;
+    
+    // Also check distance from last convoy if it extends further
+    const convoyDistance = canvas.width - lastConvoyEndX;
+    if (convoyDistance < CONFIG.SAFE_DISTANCE_BIRD_VEHICLE) return true;
+    
+    return false;
 }
 
 // Jump function - centralized logic for both keyboard and touch
@@ -482,6 +499,7 @@ function startGame() {
     nextFlyingObstacleFrame = CONFIG.FLYING_OBSTACLE_MAX_INTERVAL + CONFIG.FLYING_OBSTACLE_MIN_SCORE;
     groundObstacleInterval = CONFIG.OBSTACLE_MAX_INTERVAL;
     flyingObstacleInterval = CONFIG.FLYING_OBSTACLE_MAX_INTERVAL;
+    lastConvoyEndX = -1000;
     
     gameOverlay.style.display = 'none';
     gameLoop();
@@ -494,6 +512,8 @@ function spawnConvoy(leadVehicle, minCount, maxCount) {
         type.sprite === 'CAR' || type.sprite === 'TRUCK' || type.sprite === 'VAN'
     );
     
+    let lastVehicleEndX = leadVehicle.x + leadVehicle.width;
+    
     for (let i = 0; i < count; i++) {
         const vehicleType = getRandomElement(smallVehicleTypes);
         const vehicleColors = getRandomVehicleColors();
@@ -501,9 +521,10 @@ function spawnConvoy(leadVehicle, minCount, maxCount) {
         
         // Position vehicles behind the lead vehicle with proper spacing
         const spacing = 80 + (i * 100); // 80px after lead vehicle, then 100px between each
+        const vehicleX = leadVehicle.x + leadVehicle.width + spacing;
         
         obstacles.push({
-            x: leadVehicle.x + leadVehicle.width + spacing,
+            x: vehicleX,
             y: groundY - vehicleType.height,
             width: vehicleType.width,
             height: vehicleType.height,
@@ -513,7 +534,12 @@ function spawnConvoy(leadVehicle, minCount, maxCount) {
             flipH: false,
             palette: vehiclePalette
         });
+        
+        lastVehicleEndX = vehicleX + vehicleType.width;
     }
+    
+    // Track the end position of this convoy
+    lastConvoyEndX = lastVehicleEndX;
 }
 
 function spawnObstacle() {
@@ -552,14 +578,18 @@ function spawnObstacle() {
             // Spawn convoy vehicles behind large vehicles based on playtime
             const playTimeSeconds = frameCount / 60; // Assuming 60 FPS
             
-            // After 10 seconds: spawn 1-2 vehicles behind semi trucks
-            if (playTimeSeconds >= 10 && obstacleType.sprite === 'SEMI_TRUCK') {
-                spawnConvoy(newObstacle, 1, 2);
+            // After 15 seconds: spawn 1-2 vehicles behind semi trucks
+            // After 60 seconds: spawn up to 3 vehicles
+            if (playTimeSeconds >= 15 && obstacleType.sprite === 'SEMI_TRUCK') {
+                const maxConvoySize = playTimeSeconds >= 60 ? 3 : 2;
+                spawnConvoy(newObstacle, 1, maxConvoySize);
             }
             
-            // After 20 seconds: spawn 1-2 vehicles behind buses
-            if (playTimeSeconds >= 20 && obstacleType.sprite === 'BUS') {
-                spawnConvoy(newObstacle, 1, 2);
+            // After 30 seconds: spawn 1-2 vehicles behind buses
+            // After 60 seconds: spawn up to 3 vehicles
+            if (playTimeSeconds >= 30 && obstacleType.sprite === 'BUS') {
+                const maxConvoySize = playTimeSeconds >= 60 ? 3 : 2;
+                spawnConvoy(newObstacle, 1, maxConvoySize);
             }
             
             // Calculate next spawn time with progressive difficulty
@@ -1016,14 +1046,17 @@ function update() {
     // Update day/night cycle
     updateDayNightCycle();
     
-    // Award 1 point every 5 frames survived
-    if (frameCount % 5 === 0) {
+    // Award 1 point for survival
+    if (frameCount % CONFIG.SURVIVAL_POINTS_INTERVAL === 0) {
         score++;
     }
     
     // Increase difficulty over time
+    // After 30 seconds (1800 frames), slow speed increases by half
     if (frameCount % CONFIG.SPEED_INCREASE_INTERVAL === 0) {
-        gameSpeed += CONFIG.SPEED_INCREMENT;
+        const playTimeSeconds = frameCount / 60;
+        const speedIncrement = playTimeSeconds >= 30 ? CONFIG.SPEED_INCREMENT * 0.5 : CONFIG.SPEED_INCREMENT;
+        gameSpeed += speedIncrement;
     }
     
     updateMotorcycle();
