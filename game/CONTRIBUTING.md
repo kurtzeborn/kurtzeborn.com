@@ -29,6 +29,7 @@ game/
 
 Before submitting changes:
 
+- [ ] **Version number incremented** in `game.js` (VERSION constant at top of file)
 - [ ] All magic numbers moved to `CONFIG`
 - [ ] No duplicated logic (extracted to functions)
 - [ ] Complex calculations extracted to parameterized functions
