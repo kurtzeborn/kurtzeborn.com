@@ -7,6 +7,7 @@ on:
     paths:
       - 'game/**'
       - 'scott.kurtzeborn.com/**'
+      - 'kurtzeborn.com/**'
 
 permissions:
   contents: write
@@ -31,7 +32,7 @@ jobs:
         
       - name: Update from master
         run: |
-          git checkout master -- game scott.kurtzeborn.com
+          git checkout master -- game scott.kurtzeborn.com kurtzeborn.com
           
       - name: Check for changes
         id: check_changes
@@ -45,6 +46,6 @@ jobs:
       - name: Commit and push changes
         if: steps.check_changes.outputs.changes == 'true'
         run: |
-          git add game scott.kurtzeborn.com
+          git add game scott.kurtzeborn.com kurtzeborn.com
           git commit -m "Auto-deploy from master (commit ${{ github.sha }})"
           git push origin gh-pages
