@@ -118,8 +118,15 @@ function getSpriteDimensions(sprite, scale = CONFIG.SPRITE_SCALE) {
     };
 }
 
+// Game state constants
+const GAME_STATES = {
+    WAITING: 'waiting',
+    PLAYING: 'playing',
+    GAME_OVER: 'gameOver'
+};
+
 // Game state
-let gameState = 'waiting'; // 'waiting', 'playing', 'gameOver'
+let gameState = GAME_STATES.WAITING;
 let score = 0;
 let highScore = parseInt(localStorage.getItem('motorcycleHighScore')) || 0;
 let frameCount = 0;
@@ -334,23 +341,30 @@ function isObstacleTooClose(obstacleArray) {
     return canvas.width - lastObstacle.x < CONFIG.SAFE_DISTANCE_BIRD_VEHICLE;
 }
 
+// Jump function - centralized logic for both keyboard and touch
+function performJump() {
+    if (!motorcycle.isJumping && !motorcycle.isDucking) {
+        motorcycle.velocityY = motorcycle.jumpPower;
+        motorcycle.isJumping = true;
+        // Exit riding state when jumping
+        if (motorcycle.isRidingVehicle) {
+            motorcycle.isRidingVehicle = false;
+            motorcycle.ridingVehicle = null;
+        }
+    }
+}
+
 // Event listeners
 document.addEventListener('keydown', (e) => {
     keys[e.code] = true;
     
-    if (gameState === 'waiting' && e.code === 'Space') {
+    if (gameState === GAME_STATES.WAITING && e.code === 'Space') {
         startGame();
     }
     
-    if (gameState === 'playing') {
-        if ((e.code === 'Space' || e.code === 'ArrowUp') && !motorcycle.isJumping && !motorcycle.isDucking) {
-            motorcycle.velocityY = motorcycle.jumpPower;
-            motorcycle.isJumping = true;
-            // Exit riding state when jumping
-            if (motorcycle.isRidingVehicle) {
-                motorcycle.isRidingVehicle = false;
-                motorcycle.ridingVehicle = null;
-            }
+    if (gameState === GAME_STATES.PLAYING) {
+        if (e.code === 'Space' || e.code === 'ArrowUp') {
+            performJump();
         }
     }
     
@@ -370,30 +384,27 @@ let isTouchDucking = false;
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     
-    if (gameState === 'waiting') {
+    if (gameState === GAME_STATES.WAITING) {
         startGame();
         return;
     }
     
-    if (gameState === 'playing') {
-        const touchY = e.touches[0].clientY;
+    if (gameState === GAME_STATES.PLAYING) {
+        const touch = e.touches[0];
         const canvasRect = canvas.getBoundingClientRect();
-        const relativeY = touchY - canvasRect.top;
-        const canvasMiddle = canvasRect.height / 2;
+        const touchYRelative = touch.clientY - canvasRect.top;
+        const canvasHalfHeight = canvasRect.height / 2;
         
         // Touch bottom half to duck, top half to jump
-        if (relativeY > canvasMiddle) {
+        if (touchYRelative > canvasHalfHeight) {
             // Duck - hold finger down
             if (!motorcycle.isJumping) {
                 isTouchDucking = true;
                 keys['ArrowDown'] = true;
             }
         } else {
-            // Jump - tap top half
-            if (!motorcycle.isJumping && !motorcycle.isDucking) {
-                motorcycle.velocityY = motorcycle.jumpPower;
-                motorcycle.isJumping = true;
-            }
+            // Jump - tap top half (reuses keyboard jump logic)
+            performJump();
         }
     }
 });
@@ -414,10 +425,10 @@ restartBtn.addEventListener('click', () => {
 function startGame() {
     // Check orientation on mobile before starting
     if (!checkOrientation()) {
-        return; // Don't start game if not in landscape on mobile
+        return; // Require landscape orientation on mobile devices
     }
     
-    gameState = 'playing';
+    gameState = GAME_STATES.PLAYING;
     score = 0;
     frameCount = 0;
     sunX = canvas.width - CONFIG.SUN_START_X;
@@ -642,7 +653,7 @@ function checkCollisions() {
 }
 
 function gameOver() {
-    gameState = 'gameOver';
+    gameState = GAME_STATES.GAME_OVER;
     collisionFlash = CONFIG.COLLISION_FLASH_DURATION;
     
     if (score > highScore) {
@@ -873,7 +884,7 @@ function draw() {
     ctx.fillStyle = interpolateColor(SKY_COLORS.DAY, SKY_COLORS.NIGHT, skyTransition);
     ctx.fillRect(0, 0, canvas.width, groundY);
     
-    if (gameState === 'waiting') {
+    if (gameState === GAME_STATES.WAITING) {
         drawWaitingScreen();
         return;
     }
@@ -890,7 +901,7 @@ function draw() {
 }
 
 function update() {
-    if (gameState !== 'playing') return;
+    if (gameState !== GAME_STATES.PLAYING) return;
     
     frameCount++;
     
@@ -942,8 +953,9 @@ function checkOrientation() {
         return true;
     } else {
         orientationOverlay.style.display = 'block';
-        if (gameState === 'playing') {
-            gameState = 'waiting'; // Pause the game if it was playing
+        // Pause the game if it was playing (orientation changed mid-game)
+        if (gameState === GAME_STATES.PLAYING) {
+            gameState = GAME_STATES.WAITING;
         }
         return false;
     }
@@ -953,7 +965,7 @@ function gameLoop() {
     update();
     draw();
     
-    if (gameState === 'playing') {
+    if (gameState === GAME_STATES.PLAYING) {
         requestAnimationFrame(gameLoop);
     }
 }

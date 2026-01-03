@@ -42,9 +42,13 @@ Before submitting changes:
 - [ ] New sprites use indexed color palette
 - [ ] All control flow has proper return statements
 - [ ] preventDefault() added for game input keys
-- [ ] Touch and keyboard use same game logic functions
+- [ ] Touch and keyboard use same game logic functions (centralized action functions)
+- [ ] Game state uses constants, not magic strings (GAME_STATES.PLAYING vs 'playing')
+- [ ] Touch coordinate variables have descriptive names (touchYRelative, canvasHalfHeight)
+- [ ] Orientation detection implemented for mobile-specific features
 - [ ] Tested with `DEBUG_MODE` enabled
-- [ ] Tested on mobile/touch devices
+- [ ] Tested on mobile/touch devices (actual devices, not just DevTools)
+- [ ] Tested landscape/portrait orientation changes
 - [ ] No hard-coded scales or dimensions
 - [ ] localStorage values properly parsed as integers
 - [ ] Visual feedback for new game events
@@ -804,6 +808,132 @@ function drawGround() {
 
 ---
 
+### 17. **Using Magic Strings for Game State**
+
+**❌ Bad:**
+```javascript
+let gameState = 'waiting';  // String literal, prone to typos
+
+if (gameState === 'playing') {  // Typo here won't be caught: 'playng'
+    // ...
+}
+
+gameState = 'gameOver';  // Or was it 'game-over'? 'GameOver'?
+```
+
+**✅ Good:**
+```javascript
+// Define constants for all game states
+const GAME_STATES = {
+    WAITING: 'waiting',
+    PLAYING: 'playing',
+    GAME_OVER: 'gameOver'
+};
+
+let gameState = GAME_STATES.WAITING;
+
+if (gameState === GAME_STATES.PLAYING) {
+    // IDE autocomplete prevents typos
+}
+
+gameState = GAME_STATES.GAME_OVER;  // Impossible to misspell
+```
+
+**Why:** String literals are error-prone. Typos like `'playng'` or `'gameover'` cause runtime bugs that are hard to debug. Constants provide autocomplete, prevent typos, and make refactoring safer. If you need to rename a state, change it in one place.
+
+---
+
+### 18. **Duplicating Input Logic Between Keyboard and Touch**
+
+**❌ Bad:**
+```javascript
+// Keyboard jump
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && !motorcycle.isJumping && !motorcycle.isDucking) {
+        motorcycle.velocityY = motorcycle.jumpPower;
+        motorcycle.isJumping = true;
+        if (motorcycle.isRidingVehicle) {
+            motorcycle.isRidingVehicle = false;
+            motorcycle.ridingVehicle = null;
+        }
+    }
+});
+
+// Touch jump - duplicated logic, easy to forget conditions
+canvas.addEventListener('touchstart', (e) => {
+    if (!motorcycle.isJumping && !motorcycle.isDucking) {
+        motorcycle.velocityY = motorcycle.jumpPower;
+        motorcycle.isJumping = true;
+        // Oops! Forgot to check/clear isRidingVehicle
+    }
+});
+```
+
+**✅ Good:**
+```javascript
+// Centralized jump function
+function performJump() {
+    if (!motorcycle.isJumping && !motorcycle.isDucking) {
+        motorcycle.velocityY = motorcycle.jumpPower;
+        motorcycle.isJumping = true;
+        if (motorcycle.isRidingVehicle) {
+            motorcycle.isRidingVehicle = false;
+            motorcycle.ridingVehicle = null;
+        }
+    }
+}
+
+// Both input methods use same logic
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') performJump();
+});
+
+canvas.addEventListener('touchstart', (e) => {
+    const touchYRelative = e.touches[0].clientY - canvas.getBoundingClientRect().top;
+    if (touchYRelative < canvas.getBoundingClientRect().height / 2) {
+        performJump();
+    }
+});
+```
+
+**Why:** When game actions are triggered by multiple input methods, centralizing the logic prevents inconsistencies. Touch and keyboard should behave identically. Duplicated code leads to logic drift when you update one path but forget the other. Named functions also make the code self-documenting and testable.
+
+---
+
+### 19. **Poor Variable Naming in Touch Handlers**
+
+**❌ Bad:**
+```javascript
+canvas.addEventListener('touchstart', (e) => {
+    const touchY = e.touches[0].clientY;  // Absolute screen coordinate
+    const rect = canvas.getBoundingClientRect();
+    const y = touchY - rect.top;  // Relative to what? Canvas? Unclear.
+    const mid = rect.height / 2;  // Mid what? Midpoint?
+    
+    if (y > mid) {
+        // Duck
+    }
+});
+```
+
+**✅ Good:**
+```javascript
+canvas.addEventListener('touchstart', (e) => {
+    const touch = e.touches[0];
+    const canvasRect = canvas.getBoundingClientRect();
+    const touchYRelative = touch.clientY - canvasRect.top;  // Relative to canvas
+    const canvasHalfHeight = canvasRect.height / 2;  // Clear what this represents
+    
+    if (touchYRelative > canvasHalfHeight) {
+        // Duck - touch bottom half
+    }
+});
+```
+
+**Why:** Touch coordinate calculations involve multiple coordinate spaces (screen, canvas, relative). Descriptive variable names make the math self-documenting. `touchYRelative` clearly indicates it's relative to canvas top. `canvasHalfHeight` explains why we're dividing by 2. This prevents off-by-one errors and makes the code maintainable.
+
+---
+
 ## History of Refactorings
 
 This section documents the evolution of the codebase through major refactoring efforts.
@@ -889,25 +1019,148 @@ This section documents the evolution of the codebase through major refactoring e
 - **Visual Polish:** Landing animation adds visual feedback when motorcycle touches ground. Random cactus flipping adds variety without new assets.
 - **Gameplay Balance:** Adjusted obstacle spawning distances and scoring to improve pacing and player feedback.
 
-### Seventh Refactoring (Day/Night Cycle System)
-- ✅ Implemented dynamic day/night cycle with sun and moon crossing the sky
-- ✅ Added smooth sky color crossfade transition between day (#87CEEB) and night (#1a1a2e)
-- ✅ Created 50 parallax stars during night mode moving at variable speeds
-- ✅ Implemented color interpolation utility for gradual transitions
-- ✅ Added score text color interpolation (dark during day, white at night for visibility)
-- ✅ Extracted all day/night cycle magic numbers to CONFIG constants:
-  - SKY_DAY_COLOR, SKY_NIGHT_COLOR, SKY_TRANSITION_SPEED
-  - SUN_Y_POSITION, SUN_RADIUS, SUN_MOON_SPEED, SUN_START_X
-  - MOON_CRESCENT_OFFSET for moon shadow positioning
-  - Star configuration: COUNT, SIZE range, SPEED range, OPACITY range
-- ✅ Created SKY_COLORS constant object for all celestial colors (sun, moon, stars, sky gradients)
-- ✅ Extracted `updateDayNightCycle()` helper to consolidate cycle logic
-- ✅ Separated concerns: drawing (drawSkyObject, drawStars) and updating (updateStars, updateDayNightCycle)
-- ✅ Removed unused `dayNightCycleCount` variable
+### Seventh Refactoring (Mobile Experience & Code Quality)
+- ✅ Implemented hold-to-duck touch control (replaced swipe gesture)
+- ✅ Added touch zone detection (top half = jump, bottom half = duck)
+- ✅ Implemented landscape orientation requirement for mobile devices
+- ✅ Added orientation detection with fallbacks for older browsers
+- ✅ Created orientation overlay with user-friendly messaging
+- ✅ Added orientation change listeners (orientationchange, resize events)
+- ✅ Extracted `performJump()` function to eliminate duplicated jump logic
+- ✅ Added `GAME_STATES` constants to replace magic strings
+- ✅ Improved variable naming in touch handlers (touchYRelative, canvasHalfHeight)
+- ✅ Updated all game state references to use constants
+- ✅ Enhanced HTML instructions with Desktop/Mobile sections
+- ✅ Improved code comments throughout touch control implementation
 
 **Key Improvements:**
-- **Visual Enhancement:** Dynamic day/night cycle adds atmospheric depth and visual variety to endless runner gameplay
-- **Code Organization:** All celestial colors and timing constants centralized in CONFIG for easy tuning
-- **Performance:** Stars use simple circle rendering with cached opacity values
-- **Maintainability:** Day/night cycle logic isolated in `updateDayNightCycle()` function, easy to modify or extend
-- **User Experience:** Smooth color transitions prevent jarring switches, text always remains readable
+- **Mobile UX:** Hold-to-duck is far more intuitive than swipe gesture on touchscreens. Landscape requirement ensures adequate screen space for gameplay.
+- **Code Quality:** Centralized jump logic prevents drift between keyboard and touch implementations. Game state constants eliminate typo bugs.
+- **Browser Compatibility:** Multiple fallbacks for orientation detection (screen.orientation.type → window.orientation → aspect ratio).
+- **Maintainability:** performJump() function makes input handling code more testable and reusable.
+
+---
+
+## New Pattern: Game State Constants
+
+**Always use constants for game states instead of string literals:**
+
+```javascript
+// ✅ Good: Type-safe constants
+const GAME_STATES = {
+    WAITING: 'waiting',
+    PLAYING: 'playing',
+    GAME_OVER: 'gameOver'
+};
+
+if (gameState === GAME_STATES.PLAYING) {
+    // ...
+}
+
+// ❌ Bad: Magic strings
+if (gameState === 'playing') {  // Typo bugs: 'playng', 'Playing', etc.
+    // ...
+}
+```
+
+**Why:** 
+- IDE autocomplete catches typos at development time
+- Refactoring is safer (rename in one place)
+- More professional and maintainable code
+- Prevents runtime bugs from string mismatches
+
+---
+
+## New Pattern: Centralized Action Functions
+
+**Extract game actions into named functions instead of duplicating logic:**
+
+```javascript
+// ✅ Good: Centralized jump logic
+function performJump() {
+    if (!motorcycle.isJumping && !motorcycle.isDucking) {
+        motorcycle.velocityY = motorcycle.jumpPower;
+        motorcycle.isJumping = true;
+        if (motorcycle.isRidingVehicle) {
+            motorcycle.isRidingVehicle = false;
+            motorcycle.ridingVehicle = null;
+        }
+    }
+}
+
+// Both input methods use same logic
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') performJump();
+});
+
+canvas.addEventListener('touchstart', (e) => {
+    if (touchYRelative < canvasHalfHeight) performJump();
+});
+
+// ❌ Bad: Duplicated logic
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' && !motorcycle.isJumping) {
+        motorcycle.velocityY = motorcycle.jumpPower;
+        // ... rest of jump logic
+    }
+});
+
+canvas.addEventListener('touchstart', (e) => {
+    // Duplicate the same logic again... 
+    if (!motorcycle.isJumping) {
+        motorcycle.velocityY = motorcycle.jumpPower;
+        // Oops, forgot to check isRidingVehicle!
+    }
+});
+```
+
+**Why:**
+- Single source of truth for game actions
+- Prevents logic drift between input methods
+- Easier to test and modify behavior
+- Self-documenting code with clear function names
+- Reduces copy-paste errors
+
+---
+
+## Mobile Development Best Practices
+
+### Touch Control Design
+1. **Use Hold Instead of Swipe:** Hold gestures are more reliable than swipe detection on touchscreens
+2. **Large Touch Zones:** Divide screen into clear zones (top half = jump, bottom half = duck)
+3. **Visual Feedback:** Show touch zones or control hints for first-time mobile users
+4. **preventDefault():** Always prevent default touch behaviors to avoid scrolling
+
+### Orientation Handling
+1. **Require Landscape for Side-Scrollers:** Landscape provides better aspect ratio for runner games
+2. **Graceful Degradation:** Detect orientation with multiple fallbacks for browser compatibility
+3. **User-Friendly Messaging:** Show clear instructions when orientation is wrong
+4. **Handle Mid-Game Rotation:** Pause game gracefully if user rotates device during play
+
+### Browser Compatibility
+```javascript
+// Use progressive enhancement for orientation detection
+function isLandscape() {
+    // Modern API (most reliable)
+    if (screen.orientation && screen.orientation.type) {
+        return screen.orientation.type.includes('landscape');
+    }
+    // Legacy API (iOS Safari)
+    else if (window.orientation !== undefined) {
+        return Math.abs(window.orientation) === 90;
+    }
+    // Fallback (always works)
+    else {
+        return window.innerWidth > window.innerHeight;
+    }
+}
+```
+
+### Testing Checklist
+- [ ] Test on actual mobile devices (not just browser DevTools)
+- [ ] Test both portrait and landscape orientations
+- [ ] Test rotation during active gameplay
+- [ ] Verify touch zones are appropriately sized
+- [ ] Check that page doesn't scroll when playing
+- [ ] Test on iOS Safari and Android Chrome (minimum)
+- [ ] Verify orientation detection on older devices
