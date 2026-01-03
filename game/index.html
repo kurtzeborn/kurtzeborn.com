@@ -65,24 +65,6 @@
 			transform: scale(1.05);
 		}
 		
-		.back-link {
-			position: absolute;
-			top: 20px;
-			left: 20px;
-			color: lightgreen;
-			text-decoration: none;
-			font-size: 18px;
-			background: rgba(0, 0, 0, 0.7);
-			padding: 10px 20px;
-			border: 2px solid lightgreen;
-			border-radius: 5px;
-			z-index: 1000;
-		}
-		
-		.back-link:hover {
-			background: rgba(210, 255, 0, 0.3);
-		}
-		
 		.instructions {
 			position: absolute;
 			top: 20px;
@@ -104,12 +86,20 @@
 		.instructions p {
 			margin: 5px 0;
 		}
+		
+		.instructions.hidden {
+			display: none;
+		}
+		
+		@media (max-width: 768px) {
+			.instructions.playing {
+				display: none;
+			}
+		}
 	</style>
 </head>
 <body>
-	<a href="../scott.kurtzeborn.com/index.html" class="back-link">← Back to Home</a>
-	
-	<div class="instructions">
+	<div class="instructions" id="instructions">
 		<h3>Controls</h3>
 		<p><strong>Desktop:</strong></p>
 		<p>SPACE or ↑ - Jump</p>
