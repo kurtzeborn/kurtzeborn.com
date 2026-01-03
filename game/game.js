@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
-// Version 0.6
+// Version 0.7
 
-const VERSION = 'v0.6';
+const VERSION = 'v0.7';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -487,6 +487,35 @@ function startGame() {
     gameLoop();
 }
 
+// Spawn convoy vehicles behind a lead vehicle
+function spawnConvoy(leadVehicle, minCount, maxCount) {
+    const count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
+    const smallVehicleTypes = obstacleTypes.filter(type => 
+        type.sprite === 'CAR' || type.sprite === 'TRUCK' || type.sprite === 'VAN'
+    );
+    
+    for (let i = 0; i < count; i++) {
+        const vehicleType = getRandomElement(smallVehicleTypes);
+        const vehicleColors = getRandomVehicleColors();
+        const vehiclePalette = createSpritePalette(vehicleColors);
+        
+        // Position vehicles behind the lead vehicle with proper spacing
+        const spacing = 80 + (i * 100); // 80px after lead vehicle, then 100px between each
+        
+        obstacles.push({
+            x: leadVehicle.x + leadVehicle.width + spacing,
+            y: groundY - vehicleType.height,
+            width: vehicleType.width,
+            height: vehicleType.height,
+            sprite: vehicleType.sprite,
+            type: vehicleType.type,
+            rideable: vehicleType.rideable,
+            flipH: false,
+            palette: vehiclePalette
+        });
+    }
+}
+
 function spawnObstacle() {
     // Spawn ground obstacle (vehicle) when it's time
     if (frameCount >= nextGroundObstacleFrame) {
@@ -506,7 +535,7 @@ function spawnObstacle() {
             const vehicleColors = getRandomVehicleColors();
             const vehiclePalette = createSpritePalette(vehicleColors);
             
-            obstacles.push({
+            const newObstacle = {
                 x: canvas.width,
                 y: groundY - obstacleType.height,
                 width: obstacleType.width,
@@ -516,7 +545,22 @@ function spawnObstacle() {
                 rideable: obstacleType.rideable,
                 flipH: false, // Vehicles always face left (coming towards motorcycle)
                 palette: vehiclePalette // Random vehicle color
-            });
+            };
+            
+            obstacles.push(newObstacle);
+            
+            // Spawn convoy vehicles behind large vehicles based on playtime
+            const playTimeSeconds = frameCount / 60; // Assuming 60 FPS
+            
+            // After 10 seconds: spawn 1-2 vehicles behind semi trucks
+            if (playTimeSeconds >= 10 && obstacleType.sprite === 'SEMI_TRUCK') {
+                spawnConvoy(newObstacle, 1, 2);
+            }
+            
+            // After 20 seconds: spawn 1-2 vehicles behind buses
+            if (playTimeSeconds >= 20 && obstacleType.sprite === 'BUS') {
+                spawnConvoy(newObstacle, 1, 2);
+            }
             
             // Calculate next spawn time with progressive difficulty
             groundObstacleInterval = calculateSpawnInterval(
