@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
-// Version 0.8
+// Version 0.10
 
-const VERSION = 'v0.8';
+const VERSION = 'v0.10';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -172,6 +172,27 @@ let nextFlyingObstacleFrame = 0;
 let groundObstacleInterval = CONFIG.OBSTACLE_MAX_INTERVAL;
 let flyingObstacleInterval = CONFIG.FLYING_OBSTACLE_MAX_INTERVAL;
 let lastConvoyEndX = -1000; // Track the end position of the last convoy
+let nextBillboardFrame = 600; // First billboard at 10 seconds (600 frames at 60 FPS)
+
+// Billboard messages
+const BILLBOARD_MESSAGES = [
+    ['EASTSIDE', 'HARLEY'],
+    ['EMERALD CITY', 'HARLEY'],
+    ['H-D', 'MOTORCYCLES'],
+    ['KEEP ON', 'RIDING!'],
+    ['YOU GOT', 'THIS!'],
+    ['LOOKING', 'GOOD!'],
+    ['NICE', 'MOVES!'],
+    ['LEGENDARY!'],
+    ['STAY', 'FOCUSED!'],
+    ['KEEP', 'GOING!'],
+    ['RIDE ON!'],
+    ['SKILLED', 'RIDER!'],
+    ['TOO FAST!'],
+    ['INCREDIBLE!'],
+    ['BEAST', 'MODE!'],
+    ['DANGER', 'ZONE!']
+];
 
 // Motorcycle object
 const motorcycle = {
@@ -209,6 +230,9 @@ const flyingObstacleConfig = {
     ...getSpriteDimensions(SPRITES.BIRD_UP),
     heightVariations: [-100, -120, -140] // relative to groundY
 };
+
+// Billboards
+let billboards = [];
 
 // Ground line
 const groundY = canvas.height - 80;
@@ -484,6 +508,7 @@ function startGame() {
     gameSpeed = CONFIG.INITIAL_SPEED;
     obstacles = [];
     flyingObstacles = [];
+    billboards = [];
     particles = [];
     collisionFlash = 0;
     landingAnimation = 0;
@@ -500,6 +525,7 @@ function startGame() {
     groundObstacleInterval = CONFIG.OBSTACLE_MAX_INTERVAL;
     flyingObstacleInterval = CONFIG.FLYING_OBSTACLE_MAX_INTERVAL;
     lastConvoyEndX = -1000;
+    nextBillboardFrame = 900; // First billboard at 15 seconds
     
     gameOverlay.style.display = 'none';
     gameLoop();
@@ -632,6 +658,22 @@ function spawnObstacle() {
             nextFlyingObstacleFrame = frameCount + CONFIG.OBSTACLE_RETRY_DELAY;
         }
     }
+    
+    // Spawn billboards every 15 seconds (900 frames)
+    if (frameCount >= nextBillboardFrame) {
+        const billboardDims = getSpriteDimensions(SPRITES.BILLBOARD);
+        const message = BILLBOARD_MESSAGES[Math.floor(Math.random() * BILLBOARD_MESSAGES.length)];
+        
+        billboards.push({
+            x: canvas.width,
+            y: groundY - billboardDims.height - 20, // 20px above ground
+            width: billboardDims.width,
+            height: billboardDims.height,
+            message: message
+        });
+        
+        nextBillboardFrame = frameCount + 900; // Next billboard in 15 seconds
+    }
 }
 
 function updateObstacles() {
@@ -659,6 +701,16 @@ function updateObstacles() {
         if (flyingObstacles[i].x + flyingObstacles[i].width < 0) {
             flyingObstacles.splice(i, 1);
             score += CONFIG.FLYING_OBSTACLE_POINTS;
+        }
+    }
+    
+    // Update billboards (slower than road and vehicles)
+    for (let i = billboards.length - 1; i >= 0; i--) {
+        billboards[i].x -= gameSpeed * 0.7; // Slower than road and vehicles
+        
+        // Remove off-screen billboards
+        if (billboards[i].x + billboards[i].width < 0) {
+            billboards.splice(i, 1);
         }
     }
 }
@@ -825,6 +877,40 @@ function drawObstacles() {
     flyingObstacles.forEach(obstacle => {
         const sprite = obstacle.wingFrame === 0 ? SPRITES.BIRD_UP : SPRITES.BIRD_DOWN;
         drawSprite(sprite, obstacle.x, obstacle.y);
+    });
+}
+
+function drawBillboards() {
+    billboards.forEach(billboard => {
+        // Draw billboard sprite
+        drawSprite(SPRITES.BILLBOARD, billboard.x, billboard.y);
+        
+        // Draw white background for text area to make it readable at night
+        ctx.fillStyle = '#f5f5f5';
+        const padding = 6; // Border width in pixels (scaled)
+        ctx.fillRect(
+            billboard.x + padding, 
+            billboard.y + padding, 
+            billboard.width - (padding * 2), 
+            billboard.height - (padding * 2) - 30 // Exclude post area (10 pixels * 3 scale)
+        );
+        
+        // Draw text on billboard
+        ctx.fillStyle = '#2d2d2d';
+        ctx.font = 'bold 23px Courier New';
+        ctx.textAlign = 'center';
+        
+        const centerX = billboard.x + (billboard.width / 2);
+        const centerY = billboard.y + (billboard.height / 2);
+        
+        if (billboard.message.length === 1) {
+            // Single line - center vertically
+            ctx.fillText(billboard.message[0], centerX, centerY);
+        } else {
+            // Two lines - split vertically
+            ctx.fillText(billboard.message[0], centerX, centerY - 12);
+            ctx.fillText(billboard.message[1], centerX, centerY + 12);
+        }
     });
 }
 
@@ -1029,6 +1115,7 @@ function draw() {
     // Draw game elements (back to front)
     drawStars();
     drawSkyObject();
+    drawBillboards(); // Draw billboards before ground so they appear in background
     drawGround();
     drawParticles();
     drawMotorcycle();
