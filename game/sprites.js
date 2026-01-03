@@ -18,19 +18,37 @@ const COLORS = {
     TEXT: '#2d2d2d'
 };
 
-// Sprite color palette (indexed colors referencing COLORS)
-const SPRITE_PALETTE = [
-    COLORS.TRANSPARENT,      // 0 - transparent
-    COLORS.WHEEL,            // 1 - wheels
-    COLORS.BODY,             // 2 - motorcycle body
-    COLORS.VEHICLE_BODY,     // 3 - vehicle body (red)
-    COLORS.RIDER,            // 4 - rider body/gray
-    COLORS.HELMET,           // 5 - helmet red
-    COLORS.BIRD_BODY,        // 6 - bird body brown
-    COLORS.BIRD_WING,        // 7 - bird wings
-    COLORS.VEHICLE_DETAIL,   // 8 - vehicle details (dark red)
-    COLORS.VEHICLE_WINDOW    // 9 - vehicle windows (light blue)
+// Vehicle color palettes for randomization
+const VEHICLE_COLORS = [
+    { body: '#cc0000', detail: '#990000' }, // Red
+    { body: '#e8e8e8', detail: '#c0c0c0' }, // White/Light Gray
+    { body: '#8B4513', detail: '#654321' }, // Brown
+    { body: '#4169E1', detail: '#1E3A8A' }  // Blue
 ];
+
+// Function to get random vehicle colors
+function getRandomVehicleColors() {
+    return VEHICLE_COLORS[Math.floor(Math.random() * VEHICLE_COLORS.length)];
+}
+
+// Function to create sprite palette with vehicle colors
+function createSpritePalette(vehicleColors = { body: COLORS.VEHICLE_BODY, detail: COLORS.VEHICLE_DETAIL }) {
+    return [
+        COLORS.TRANSPARENT,      // 0 - transparent
+        COLORS.WHEEL,            // 1 - wheels
+        COLORS.BODY,             // 2 - motorcycle body
+        vehicleColors.body,      // 3 - vehicle body (randomized)
+        COLORS.RIDER,            // 4 - rider body/gray
+        COLORS.HELMET,           // 5 - helmet red
+        COLORS.BIRD_BODY,        // 6 - bird body brown
+        COLORS.BIRD_WING,        // 7 - bird wings
+        vehicleColors.detail,    // 8 - vehicle details (randomized)
+        COLORS.VEHICLE_WINDOW    // 9 - vehicle windows (light blue)
+    ];
+}
+
+// Default sprite palette
+let SPRITE_PALETTE = createSpritePalette();
 
 // Pixel Art Sprites
 const SPRITES = {
