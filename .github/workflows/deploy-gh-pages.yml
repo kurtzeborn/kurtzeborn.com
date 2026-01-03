@@ -8,6 +8,7 @@ on:
       - 'game/**'
       - 'scott.kurtzeborn.com/**'
       - 'kurtzeborn.com/**'
+  workflow_dispatch:
 
 permissions:
   contents: write
