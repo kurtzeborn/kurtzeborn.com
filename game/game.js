@@ -19,7 +19,9 @@ const CONFIG = {
     FLYING_OBSTACLE_MIN_INTERVAL: 100,
     FLYING_OBSTACLE_MAX_INTERVAL: 200,
     FLYING_OBSTACLE_MIN_SCORE: 100,
-    GROUND_OBSTACLE_POINTS: 50,
+    VEHICLE_POINTS: 50,
+    RIDEABLE_VEHICLE_POINTS: 100,
+    RIDEABLE_VEHICLE_MIN_SCORE: 300,
     FLYING_OBSTACLE_POINTS: 75,
     FLYING_OBSTACLE_SPEED_MULTIPLIER: 1.2,
     GROUND_ROAD_WIDTH: 40,
@@ -31,7 +33,7 @@ const CONFIG = {
     COLLISION_FLASH_DURATION: 10,
     BIRD_WING_FLAP_FRAME_INTERVAL: 10,
     HITBOX_SIZE_RATIO: 0.7,
-    SAFE_DISTANCE_BIRD_CACTUS: 300,
+    SAFE_DISTANCE_BIRD_VEHICLE: 300,
     OBSTACLE_RETRY_DELAY: 20,
     GROUND_INTERVAL_MIN_SPACING: 30,
     FLYING_INTERVAL_MIN_CAP: 60,
@@ -141,7 +143,9 @@ const motorcycle = {
     isDucking: false,
     groundY: canvas.height - 140,
     duckHeight: 40,
-    normalHeight: 60
+    normalHeight: 60,
+    isRidingVehicle: false,
+    ridingVehicle: null
 };
 
 // Obstacles array
@@ -149,10 +153,11 @@ let obstacles = [];
 // Define obstacle types - dimensions are calculated from sprites automatically
 function getObstacleTypes() {
     return [
-        { sprite: 'CACTUS_SMALL', ...getSpriteDimensions(SPRITES.CACTUS_SMALL), type: 'cactus' },
-        { sprite: 'CACTUS_MEDIUM', ...getSpriteDimensions(SPRITES.CACTUS_MEDIUM), type: 'cactus' },
-        { sprite: 'CACTUS_TALL', ...getSpriteDimensions(SPRITES.CACTUS_TALL), type: 'cactus' },
-        { sprite: 'CACTUS_EXTRA_TALL', ...getSpriteDimensions(SPRITES.CACTUS_EXTRA_TALL), type: 'cactus' }
+        { sprite: 'CAR', ...getSpriteDimensions(SPRITES.CAR), type: 'vehicle', rideable: false },
+        { sprite: 'TRUCK', ...getSpriteDimensions(SPRITES.TRUCK), type: 'vehicle', rideable: false },
+        { sprite: 'VAN', ...getSpriteDimensions(SPRITES.VAN), type: 'vehicle', rideable: false },
+        { sprite: 'BUS', ...getSpriteDimensions(SPRITES.BUS), type: 'vehicle', rideable: true },
+        { sprite: 'SEMI_TRUCK', ...getSpriteDimensions(SPRITES.SEMI_TRUCK), type: 'vehicle', rideable: true }
     ];
 }
 const obstacleTypes = getObstacleTypes();
@@ -325,7 +330,7 @@ function calculateSpawnInterval(minInterval, maxInterval, minCap, minSpacing) {
 function isObstacleTooClose(obstacleArray) {
     if (obstacleArray.length === 0) return false;
     const lastObstacle = obstacleArray[obstacleArray.length - 1];
-    return canvas.width - lastObstacle.x < CONFIG.SAFE_DISTANCE_BIRD_CACTUS;
+    return canvas.width - lastObstacle.x < CONFIG.SAFE_DISTANCE_BIRD_VEHICLE;
 }
 
 // Event listeners
@@ -340,6 +345,11 @@ document.addEventListener('keydown', (e) => {
         if ((e.code === 'Space' || e.code === 'ArrowUp') && !motorcycle.isJumping && !motorcycle.isDucking) {
             motorcycle.velocityY = motorcycle.jumpPower;
             motorcycle.isJumping = true;
+            // Exit riding state when jumping
+            if (motorcycle.isRidingVehicle) {
+                motorcycle.isRidingVehicle = false;
+                motorcycle.ridingVehicle = null;
+            }
         }
     }
     
@@ -409,6 +419,8 @@ function startGame() {
     motorcycle.isJumping = false;
     motorcycle.isDucking = false;
     motorcycle.height = motorcycle.normalHeight;
+    motorcycle.isRidingVehicle = false;
+    motorcycle.ridingVehicle = null;
     
     // Reset spawn timers
     nextGroundObstacleFrame = CONFIG.OBSTACLE_MAX_INTERVAL;
@@ -421,11 +433,21 @@ function startGame() {
 }
 
 function spawnObstacle() {
-    // Spawn ground obstacle when it's time
+    // Spawn ground obstacle (vehicle) when it's time
     if (frameCount >= nextGroundObstacleFrame) {
         // Check if there's a recent flying obstacle that would create an impossible situation
         if (!isObstacleTooClose(flyingObstacles)) {
-            const obstacleType = getRandomElement(obstacleTypes);
+            // Separate rideable vs non-rideable vehicles based on score
+            let availableTypes = obstacleTypes;
+            if (score >= CONFIG.RIDEABLE_VEHICLE_MIN_SCORE) {
+                // All vehicle types available
+                availableTypes = obstacleTypes;
+            } else {
+                // Only non-rideable vehicles
+                availableTypes = obstacleTypes.filter(type => !type.rideable);
+            }
+            
+            const obstacleType = getRandomElement(availableTypes);
             obstacles.push({
                 x: canvas.width,
                 y: groundY - obstacleType.height,
@@ -433,7 +455,8 @@ function spawnObstacle() {
                 height: obstacleType.height,
                 sprite: obstacleType.sprite,
                 type: obstacleType.type,
-                flipH: Math.random() < 0.5 // Randomly flip horizontally
+                rideable: obstacleType.rideable,
+                flipH: false // Vehicles always face left (coming towards motorcycle)
             });
             
             // Calculate next spawn time with progressive difficulty
@@ -479,14 +502,15 @@ function spawnObstacle() {
 }
 
 function updateObstacles() {
-    // Update ground obstacles
+    // Update ground obstacles (vehicles)
     for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].x -= gameSpeed;
         
-        // Remove off-screen obstacles
+        // Remove off-screen obstacles and award points
         if (obstacles[i].x + obstacles[i].width < 0) {
+            const points = obstacles[i].rideable ? CONFIG.RIDEABLE_VEHICLE_POINTS : CONFIG.VEHICLE_POINTS;
             obstacles.splice(i, 1);
-            score += CONFIG.GROUND_OBSTACLE_POINTS;
+            score += points;
         }
     }
     
@@ -505,12 +529,33 @@ function updateObstacles() {
 }
 
 function updateMotorcycle() {
-    // Handle ducking
-    if (keys['ArrowDown'] && !motorcycle.isJumping) {
+    // Handle riding state
+    if (motorcycle.isRidingVehicle && motorcycle.ridingVehicle) {
+        const vehicle = motorcycle.ridingVehicle;
+        
+        // Check if vehicle scrolled past motorcycle
+        if (vehicle.x + vehicle.width < motorcycle.x) {
+            // Fall off vehicle
+            motorcycle.isRidingVehicle = false;
+            motorcycle.ridingVehicle = null;
+            motorcycle.isJumping = true;
+            motorcycle.velocityY = 0; // Start falling from current position
+        } else {
+            // Lock motorcycle Y position to top of vehicle
+            const rideHeight = 5; // Small offset above vehicle
+            motorcycle.y = vehicle.y - motorcycle.height - rideHeight;
+            
+            // Player can jump while riding
+            // (handled by handleJump function)
+        }
+    }
+    
+    // Handle ducking (only when not riding)
+    if (!motorcycle.isRidingVehicle && keys['ArrowDown'] && !motorcycle.isJumping) {
         motorcycle.isDucking = true;
         motorcycle.height = motorcycle.duckHeight;
         motorcycle.y = motorcycle.groundY + (motorcycle.normalHeight - motorcycle.duckHeight);
-    } else if (!motorcycle.isJumping) {
+    } else if (!motorcycle.isJumping && !motorcycle.isRidingVehicle) {
         motorcycle.isDucking = false;
         motorcycle.height = motorcycle.normalHeight;
         motorcycle.y = motorcycle.groundY;
@@ -526,6 +571,8 @@ function updateMotorcycle() {
             motorcycle.y = motorcycle.groundY;
             motorcycle.velocityY = 0;
             motorcycle.isJumping = false;
+            motorcycle.isRidingVehicle = false;
+            motorcycle.ridingVehicle = null;
             landingAnimation = 8; // Show landing animation for 8 frames
         }
     }
@@ -539,9 +586,31 @@ function updateMotorcycle() {
 function checkCollisions() {
     const motorHitbox = getMotorcycleHitbox();
     
-    // Check ground obstacles
+    // Check ground obstacles (vehicles)
     for (let obstacle of obstacles) {
-        if (checkAABBCollision(motorHitbox, obstacle)) {
+        // Two-phase collision detection for rideable vehicles
+        if (obstacle.rideable) {
+            // Phase 1: Check if landing on top of rideable vehicle
+            const landingOnTop = 
+                motorcycle.isJumping && 
+                motorcycle.velocityY > 0 && // falling down
+                motorHitbox.x + motorHitbox.width > obstacle.x && 
+                motorHitbox.x < obstacle.x + obstacle.width &&
+                motorHitbox.y + motorHitbox.height <= obstacle.y + 10 && // within 10px of top
+                motorHitbox.y + motorHitbox.height >= obstacle.y - 5; // above or slightly overlapping
+            
+            if (landingOnTop) {
+                // Land on vehicle
+                motorcycle.isRidingVehicle = true;
+                motorcycle.ridingVehicle = obstacle;
+                motorcycle.isJumping = false;
+                motorcycle.velocityY = 0;
+                continue; // Skip collision check
+            }
+        }
+        
+        // Phase 2: Standard AABB collision for side/front impacts
+        if (!motorcycle.isRidingVehicle && checkAABBCollision(motorHitbox, obstacle)) {
             gameOver();
             return;
         }
@@ -598,7 +667,7 @@ function drawMotorcycle() {
 }
 
 function drawObstacles() {
-    // Draw ground obstacles (cacti sprites)
+    // Draw ground obstacles (vehicle sprites)
     obstacles.forEach(obstacle => {
         const sprite = SPRITES[obstacle.sprite];
         if (sprite) {
