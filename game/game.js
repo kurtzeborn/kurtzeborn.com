@@ -216,14 +216,14 @@ function getRandomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-function calculateHitbox(spriteDims, sizeRatio = CONFIG.HITBOX_SIZE_RATIO) {
+function calculateHitbox(spriteDims, sizeRatio = CONFIG.HITBOX_SIZE_RATIO, customOffsetX = null, customOffsetY = null) {
     const hitboxWidth = spriteDims.width * sizeRatio;
     const hitboxHeight = spriteDims.height * sizeRatio;
     return {
         width: hitboxWidth,
         height: hitboxHeight,
-        offsetX: (spriteDims.width - hitboxWidth) / 2,
-        offsetY: (spriteDims.height - hitboxHeight) / 2
+        offsetX: customOffsetX !== null ? customOffsetX : (spriteDims.width - hitboxWidth) / 2,
+        offsetY: customOffsetY !== null ? customOffsetY : (spriteDims.height - hitboxHeight) / 2
     };
 }
 
@@ -237,8 +237,8 @@ function checkAABBCollision(rect1, rect2) {
 // Cache hitbox dimensions
 const normalDims = getSpriteDimensions(SPRITES.MOTORCYCLE_NORMAL);
 const duckDims = getSpriteDimensions(SPRITES.MOTORCYCLE_DUCK);
-const normalHitbox = calculateHitbox(normalDims);
-const duckHitbox = calculateHitbox(duckDims);
+const normalHitbox = calculateHitbox(normalDims, CONFIG.HITBOX_SIZE_RATIO, 1, 4);
+const duckHitbox = calculateHitbox(duckDims, CONFIG.HITBOX_SIZE_RATIO, 1, 3);
 
 function getMotorcycleHitbox() {
     const hitbox = motorcycle.isDucking ? duckHitbox : normalHitbox;
