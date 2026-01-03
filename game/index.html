@@ -113,8 +113,8 @@
 		<h3>Controls</h3>
 		<p>SPACE or ↑ - Jump</p>
 		<p>↓ - Duck</p>
-		<p>Touch/Tap - Jump</p>
-		<p>Swipe Down - Duck</p>
+		<p>Touch Top - Jump</p>
+		<p>Hold Bottom - Duck</p>
 	</div>
 	
 	<canvas id="gameCanvas" width="1000" height="400"></canvas>
@@ -124,6 +124,11 @@
 		<p id="finalScore">Score: 0</p>
 		<p id="highScore">High Score: 0</p>
 		<button id="restartBtn">RESTART</button>
+	</div>
+	
+	<div id="orientationOverlay" class="game-overlay" style="display: none;">
+		<h2>📱 ROTATE DEVICE</h2>
+		<p>Please rotate your device to landscape mode to play</p>
 	</div>
 	
 	<script src="sprites.js"></script>
