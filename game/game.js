@@ -36,7 +36,23 @@ const CONFIG = {
     GROUND_INTERVAL_MIN_SPACING: 30,
     FLYING_INTERVAL_MIN_CAP: 60,
     FLYING_INTERVAL_MIN_SPACING: 50,
-    DEBUG_MODE: false // Set to true to see hitboxes
+    DEBUG_MODE: false, // Set to true to see hitboxes
+    // Day/night cycle configuration
+    SKY_DAY_COLOR: '#87CEEB',
+    SKY_NIGHT_COLOR: '#1a1a2e',
+    SKY_TRANSITION_SPEED: 0.01,
+    SUN_Y_POSITION: 60,
+    SUN_RADIUS: 30,
+    SUN_MOON_SPEED: 0.5,
+    SUN_START_X: 100,
+    MOON_CRESCENT_OFFSET: 12,
+    STAR_COUNT: 50,
+    STAR_MIN_SIZE: 0.5,
+    STAR_MAX_SIZE: 2.0,
+    STAR_MIN_SPEED: 0.05,
+    STAR_MAX_SPEED: 0.15,
+    STAR_MIN_OPACITY: 0.5,
+    STAR_MAX_OPACITY: 1.0
 };
 
 // Note: COLORS and SPRITE_PALETTE are defined in sprites.js
@@ -151,8 +167,49 @@ const flyingObstacleConfig = {
 // Ground line
 const groundY = canvas.height - 80;
 
+// Sun/moon position (crosses sky as game progresses)
+let sunX = 100;
+let isNightMode = false;
+let skyTransition = 0; // 0 = day, 1 = night, crossfades between
+
+// Sky color constants for easy reference
+const SKY_COLORS = {
+    DAY: CONFIG.SKY_DAY_COLOR,
+    NIGHT: CONFIG.SKY_NIGHT_COLOR,
+    TEXT_DAY: '#2d2d2d',
+    TEXT_NIGHT: '#ffffff',
+    SUN_CORE: '#FFD700',
+    SUN_GLOW: [
+        'rgba(255, 255, 150, 0.8)',
+        'rgba(255, 220, 100, 0.4)',
+        'rgba(255, 200, 80, 0.2)',
+        'rgba(255, 180, 60, 0)'
+    ],
+    MOON: '#F0E68C',
+    STAR: 'rgba(255, 255, 255, {opacity})'
+};
+
+// Stars for night mode
+let stars = [];
+
 // Particle system for visual effects
 let particles = [];
+
+// Interpolate between two hex colors
+function interpolateColor(color1, color2, factor) {
+    const c1 = parseInt(color1.slice(1), 16);
+    const c2 = parseInt(color2.slice(1), 16);
+    const r1 = (c1 >> 16) & 0xff;
+    const g1 = (c1 >> 8) & 0xff;
+    const b1 = c1 & 0xff;
+    const r2 = (c2 >> 16) & 0xff;
+    const g2 = (c2 >> 8) & 0xff;
+    const b2 = c2 & 0xff;
+    const r = Math.round(r1 + (r2 - r1) * factor);
+    const g = Math.round(g1 + (g2 - g1) * factor);
+    const b = Math.round(b1 + (b2 - b1) * factor);
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
 
 class Particle {
     constructor(x, y, vx, vy, color, life) {
@@ -216,14 +273,14 @@ function getRandomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
 
-function calculateHitbox(spriteDims, sizeRatio = CONFIG.HITBOX_SIZE_RATIO) {
+function calculateHitbox(spriteDims, sizeRatio = CONFIG.HITBOX_SIZE_RATIO, customOffsetX = null, customOffsetY = null) {
     const hitboxWidth = spriteDims.width * sizeRatio;
     const hitboxHeight = spriteDims.height * sizeRatio;
     return {
         width: hitboxWidth,
         height: hitboxHeight,
-        offsetX: (spriteDims.width - hitboxWidth) / 2,
-        offsetY: (spriteDims.height - hitboxHeight) / 2
+        offsetX: customOffsetX !== null ? customOffsetX : (spriteDims.width - hitboxWidth) / 2,
+        offsetY: customOffsetY !== null ? customOffsetY : (spriteDims.height - hitboxHeight) / 2
     };
 }
 
@@ -237,8 +294,8 @@ function checkAABBCollision(rect1, rect2) {
 // Cache hitbox dimensions
 const normalDims = getSpriteDimensions(SPRITES.MOTORCYCLE_NORMAL);
 const duckDims = getSpriteDimensions(SPRITES.MOTORCYCLE_DUCK);
-const normalHitbox = calculateHitbox(normalDims);
-const duckHitbox = calculateHitbox(duckDims);
+const normalHitbox = calculateHitbox(normalDims, CONFIG.HITBOX_SIZE_RATIO, 1, 4);
+const duckHitbox = calculateHitbox(duckDims, CONFIG.HITBOX_SIZE_RATIO, 1, 3);
 
 function getMotorcycleHitbox() {
     const hitbox = motorcycle.isDucking ? duckHitbox : normalHitbox;
@@ -337,6 +394,10 @@ function startGame() {
     gameState = 'playing';
     score = 0;
     frameCount = 0;
+    sunX = canvas.width - CONFIG.SUN_START_X;
+    isNightMode = false;
+    skyTransition = 0;
+    stars = [];
     gameSpeed = CONFIG.INITIAL_SPEED;
     obstacles = [];
     flyingObstacles = [];
@@ -552,6 +613,106 @@ function drawObstacles() {
     });
 }
 
+function drawSkyObject() {
+    const skyY = CONFIG.SUN_Y_POSITION;
+    const radius = CONFIG.SUN_RADIUS;
+    
+    if (isNightMode) {
+        // Draw crescent moon
+        ctx.fillStyle = SKY_COLORS.MOON;
+        ctx.beginPath();
+        ctx.arc(sunX, skyY, radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw shadow to create crescent
+        ctx.fillStyle = interpolateColor(SKY_COLORS.DAY, SKY_COLORS.NIGHT, skyTransition);
+        ctx.beginPath();
+        ctx.arc(sunX + CONFIG.MOON_CRESCENT_OFFSET, skyY, radius, 0, Math.PI * 2);
+        ctx.fill();
+    } else {
+        // Draw sun with glow
+        const gradient = ctx.createRadialGradient(sunX, skyY, radius * 0.3, sunX, skyY, radius * 2);
+        gradient.addColorStop(0, SKY_COLORS.SUN_GLOW[0]);
+        gradient.addColorStop(0.3, SKY_COLORS.SUN_GLOW[1]);
+        gradient.addColorStop(0.6, SKY_COLORS.SUN_GLOW[2]);
+        gradient.addColorStop(1, SKY_COLORS.SUN_GLOW[3]);
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(sunX, skyY, radius * 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw sun core
+        ctx.fillStyle = SKY_COLORS.SUN_CORE;
+        ctx.beginPath();
+        ctx.arc(sunX, skyY, radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function drawStars() {
+    if (!isNightMode) return;
+    
+    stars.forEach(star => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+function updateStars() {
+    if (!isNightMode) return;
+    
+    // Move stars left at their individual speeds
+    stars.forEach(star => {
+        star.x -= star.speed;
+        
+        // Wrap around when they go off screen
+        if (star.x < -10) {
+            star.x = canvas.width + 10;
+        }
+    });
+}
+
+function updateDayNightCycle() {
+    // Move sun/moon across sky
+    sunX -= CONFIG.SUN_MOON_SPEED;
+    
+    // Switch between day and night when sun/moon reaches left side
+    if (sunX <= CONFIG.SUN_START_X) {
+        isNightMode = !isNightMode;
+        if (isNightMode) {
+            initializeStars();
+        }
+        sunX = canvas.width - CONFIG.SUN_START_X;
+    }
+    
+    // Gradually transition sky color (crossfade)
+    const targetTransition = isNightMode ? 1 : 0;
+    if (skyTransition < targetTransition) {
+        skyTransition = Math.min(skyTransition + CONFIG.SKY_TRANSITION_SPEED, targetTransition);
+    } else if (skyTransition > targetTransition) {
+        skyTransition = Math.max(skyTransition - CONFIG.SKY_TRANSITION_SPEED, targetTransition);
+    }
+    
+    // Update stars during night
+    updateStars();
+}
+
+function initializeStars() {
+    stars = [];
+    for (let i = 0; i < CONFIG.STAR_COUNT; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * (groundY - 100),
+            size: Math.random() * (CONFIG.STAR_MAX_SIZE - CONFIG.STAR_MIN_SIZE) + CONFIG.STAR_MIN_SIZE,
+            speed: Math.random() * (CONFIG.STAR_MAX_SPEED - CONFIG.STAR_MIN_SPEED) + CONFIG.STAR_MIN_SPEED,
+            opacity: Math.random() * (CONFIG.STAR_MAX_OPACITY - CONFIG.STAR_MIN_OPACITY) + CONFIG.STAR_MIN_OPACITY
+        });
+    }
+}
+
 function drawGround() {
     // Draw road (wider black line)
     ctx.strokeStyle = COLORS.GROUND_LINE;
@@ -574,7 +735,8 @@ function drawGround() {
 }
 
 function drawScore() {
-    ctx.fillStyle = COLORS.TEXT;
+    // Interpolate text color between dark and white based on sky transition
+    ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
     ctx.font = 'bold 24px Courier New';
     ctx.textAlign = 'right';
     ctx.fillText(`Score: ${score}`, canvas.width - 20, 40);
@@ -622,12 +784,18 @@ function draw() {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    // Draw sky background with crossfade
+    ctx.fillStyle = interpolateColor(SKY_COLORS.DAY, SKY_COLORS.NIGHT, skyTransition);
+    ctx.fillRect(0, 0, canvas.width, groundY);
+    
     if (gameState === 'waiting') {
         drawWaitingScreen();
         return;
     }
     
     // Draw game elements (back to front)
+    drawStars();
+    drawSkyObject();
     drawGround();
     drawParticles();
     drawMotorcycle();
@@ -640,6 +808,9 @@ function update() {
     if (gameState !== 'playing') return;
     
     frameCount++;
+    
+    // Update day/night cycle
+    updateDayNightCycle();
     
     // Award 1 point every 5 frames survived
     if (frameCount % 5 === 0) {
