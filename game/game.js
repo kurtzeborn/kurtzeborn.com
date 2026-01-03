@@ -834,9 +834,9 @@ function drawScore() {
     // Interpolate text color between dark and white based on sky transition
     ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
     ctx.font = 'bold 24px Courier New';
-    ctx.textAlign = 'right';
-    ctx.fillText(`Score: ${score}`, canvas.width - 20, 40);
-    ctx.fillText(`HI: ${highScore}`, canvas.width - 20, 70);
+    ctx.textAlign = 'center';
+    ctx.fillText(`Score: ${score}`, canvas.width / 2, 40);
+    ctx.fillText(`HI: ${highScore}`, canvas.width / 2, 70);
     
     // Debug mode - show FPS and speed
     if (CONFIG.DEBUG_MODE) {
