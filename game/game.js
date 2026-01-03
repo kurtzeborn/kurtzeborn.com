@@ -6,6 +6,7 @@ const gameOverlay = document.getElementById('gameOverlay');
 const finalScoreEl = document.getElementById('finalScore');
 const highScoreEl = document.getElementById('highScore');
 const restartBtn = document.getElementById('restartBtn');
+const orientationOverlay = document.getElementById('orientationOverlay');
 
 // Game configuration constants
 const CONFIG = {
@@ -364,36 +365,46 @@ document.addEventListener('keyup', (e) => {
 });
 
 // Touch/Mobile support
-let touchStartY = 0;
+let isTouchDucking = false;
 
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    touchStartY = e.touches[0].clientY;
     
     if (gameState === 'waiting') {
         startGame();
-    } else if (gameState === 'playing' && !motorcycle.isJumping && !motorcycle.isDucking) {
-        motorcycle.velocityY = motorcycle.jumpPower;
-        motorcycle.isJumping = true;
+        return;
     }
-});
-
-canvas.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    const touchY = e.touches[0].clientY;
-    const deltaY = touchY - touchStartY;
     
-    // Swipe down to duck
-    if (gameState === 'playing' && deltaY > 30 && !motorcycle.isJumping) {
-        keys['ArrowDown'] = true;
-    } else {
-        keys['ArrowDown'] = false;
+    if (gameState === 'playing') {
+        const touchY = e.touches[0].clientY;
+        const canvasRect = canvas.getBoundingClientRect();
+        const relativeY = touchY - canvasRect.top;
+        const canvasMiddle = canvasRect.height / 2;
+        
+        // Touch bottom half to duck, top half to jump
+        if (relativeY > canvasMiddle) {
+            // Duck - hold finger down
+            if (!motorcycle.isJumping) {
+                isTouchDucking = true;
+                keys['ArrowDown'] = true;
+            }
+        } else {
+            // Jump - tap top half
+            if (!motorcycle.isJumping && !motorcycle.isDucking) {
+                motorcycle.velocityY = motorcycle.jumpPower;
+                motorcycle.isJumping = true;
+            }
+        }
     }
 });
 
 canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
-    keys['ArrowDown'] = false;
+    // Release duck when finger is lifted
+    if (isTouchDucking) {
+        keys['ArrowDown'] = false;
+        isTouchDucking = false;
+    }
 });
 
 restartBtn.addEventListener('click', () => {
@@ -401,6 +412,11 @@ restartBtn.addEventListener('click', () => {
 });
 
 function startGame() {
+    // Check orientation on mobile before starting
+    if (!checkOrientation()) {
+        return; // Don't start game if not in landscape on mobile
+    }
+    
     gameState = 'playing';
     score = 0;
     frameCount = 0;
@@ -899,6 +915,40 @@ function update() {
     checkCollisions();
 }
 
+// Orientation detection for mobile devices
+function isLandscape() {
+    // Check if it's a mobile device first
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (!isMobile) {
+        return true; // Allow desktop play in any orientation
+    }
+    
+    // For mobile, check orientation
+    if (screen.orientation && screen.orientation.type) {
+        return screen.orientation.type.includes('landscape');
+    } else if (window.orientation !== undefined) {
+        // Fallback for older browsers: 90 or -90 is landscape
+        return Math.abs(window.orientation) === 90;
+    } else {
+        // Final fallback: check aspect ratio
+        return window.innerWidth > window.innerHeight;
+    }
+}
+
+function checkOrientation() {
+    if (isLandscape()) {
+        orientationOverlay.style.display = 'none';
+        return true;
+    } else {
+        orientationOverlay.style.display = 'block';
+        if (gameState === 'playing') {
+            gameState = 'waiting'; // Pause the game if it was playing
+        }
+        return false;
+    }
+}
+
 function gameLoop() {
     update();
     draw();
@@ -910,3 +960,8 @@ function gameLoop() {
 
 // Initial draw
 draw();
+
+// Check orientation on load and listen for changes
+checkOrientation();
+window.addEventListener('orientationchange', checkOrientation);
+window.addEventListener('resize', checkOrientation);
