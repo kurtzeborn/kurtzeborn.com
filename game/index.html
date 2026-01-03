@@ -91,7 +91,8 @@
 			display: none;
 		}
 		
-		@media (max-width: 768px) {
+		/* Hide instructions during gameplay on mobile/tablet devices */
+		@media (hover: none) and (pointer: coarse) {
 			.instructions.playing {
 				display: none;
 			}
