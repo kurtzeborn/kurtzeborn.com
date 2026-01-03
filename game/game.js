@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
-// Version 0.5
+// Version 0.6
 
-const VERSION = 'v0.5';
+const VERSION = 'v0.6';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -562,8 +562,10 @@ function spawnObstacle() {
 
 function updateObstacles() {
     // Update ground obstacles (vehicles)
+    // Vehicles move slightly faster than road to appear traveling in opposite direction
+    const vehicleSpeed = gameSpeed * 1.3;
     for (let i = obstacles.length - 1; i >= 0; i--) {
-        obstacles[i].x -= gameSpeed;
+        obstacles[i].x -= vehicleSpeed;
         
         // Remove off-screen obstacles and award points
         if (obstacles[i].x + obstacles[i].width < 0) {
