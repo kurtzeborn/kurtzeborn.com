@@ -11,6 +11,7 @@ const dailyHighScoreEl = document.getElementById('dailyHighScore');
 const allTimeHighScoreEl = document.getElementById('allTimeHighScore');
 const restartBtn = document.getElementById('restartBtn');
 const orientationOverlay = document.getElementById('orientationOverlay');
+const instructionsEl = document.getElementById('instructions');
 
 // Game configuration constants
 const CONFIG = {
@@ -444,6 +445,8 @@ canvas.addEventListener('touchend', (e) => {
 });
 
 restartBtn.addEventListener('click', () => {
+    gameOverlay.style.display = 'none';
+    instructionsEl.classList.remove('playing');
     startGame();
 });
 
@@ -454,6 +457,7 @@ function startGame() {
     }
     
     gameState = GAME_STATES.PLAYING;
+    instructionsEl.classList.add('playing');
     score = 0;
     frameCount = 0;
     sunX = canvas.width - CONFIG.SUN_START_X;
@@ -923,6 +927,10 @@ function drawWaitingScreen() {
     ctx.font = 'bold 32px Courier New';
     ctx.textAlign = 'center';
     ctx.fillText('Press SPACE to Start', canvas.width / 2, canvas.height / 2 - 50);
+    
+    // Draw version number in small font
+    ctx.font = '12px Courier New';
+    ctx.fillText(VERSION, canvas.width / 2, canvas.height / 2 - 10);
     
     // Draw in correct order: ground first, then motorcycle on top
     drawGround();
