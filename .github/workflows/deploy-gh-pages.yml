@@ -8,8 +8,6 @@ on:
       - 'game/**'
       - 'scott.kurtzeborn.com/**'
       - 'kurtzeborn.com/**'
-    paths-ignore:
-      - '**/*.md'
 
 permissions:
   contents: write
