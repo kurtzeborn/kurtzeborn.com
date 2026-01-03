@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
-// Version 0.3
+// Version 0.4
 
-const VERSION = 'v0.3';
+const VERSION = 'v0.4';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -66,9 +66,13 @@ const CONFIG = {
 // Sprite cache for performance
 const spriteCache = new Map();
 
-function getCachedSprite(sprite, scale = CONFIG.SPRITE_SCALE, flipH = false) {
-    // Create unique cache key including flip state
-    const key = sprite + '_' + scale + '_' + (flipH ? 'f' : 'n');
+function getCachedSprite(sprite, scale = CONFIG.SPRITE_SCALE, flipH = false, palette = null) {
+    // Use custom palette if provided, otherwise use default
+    const usePalette = palette || SPRITE_PALETTE;
+    
+    // Create unique cache key including flip state and palette hash
+    const paletteKey = palette ? palette[3] + palette[8] : 'default';
+    const key = sprite + '_' + scale + '_' + (flipH ? 'f' : 'n') + '_' + paletteKey;
     
     if (!spriteCache.has(key)) {
         // Create offscreen canvas for this sprite
@@ -90,7 +94,7 @@ function getCachedSprite(sprite, scale = CONFIG.SPRITE_SCALE, flipH = false) {
             for (let col = 0; col < sprite[row].length; col++) {
                 const colorIndex = sprite[row][col];
                 if (colorIndex !== 0) {
-                    offscreenCtx.fillStyle = SPRITE_PALETTE[colorIndex];
+                    offscreenCtx.fillStyle = usePalette[colorIndex];
                     offscreenCtx.fillRect(
                         col * scale,
                         row * scale,
@@ -108,8 +112,8 @@ function getCachedSprite(sprite, scale = CONFIG.SPRITE_SCALE, flipH = false) {
 }
 
 // Sprite rendering function - now uses cached sprites
-function drawSprite(sprite, x, y, scale = CONFIG.SPRITE_SCALE, flipH = false) {
-    const cachedSprite = getCachedSprite(sprite, scale, flipH);
+function drawSprite(sprite, x, y, scale = CONFIG.SPRITE_SCALE, flipH = false, palette = null) {
+    const cachedSprite = getCachedSprite(sprite, scale, flipH, palette);
     ctx.drawImage(cachedSprite, Math.floor(x), Math.floor(y));
 }
 
@@ -164,8 +168,6 @@ let flyingObstacleInterval = CONFIG.FLYING_OBSTACLE_MAX_INTERVAL;
 const motorcycle = {
     x: 50,
     y: canvas.height - 140,
-    width: 80,
-    height: 60,
     velocityY: 0,
     gravity: 0.8,
     jumpPower: -15,
@@ -467,7 +469,6 @@ function startGame() {
     motorcycle.velocityY = 0;
     motorcycle.isJumping = false;
     motorcycle.isDucking = false;
-    motorcycle.height = motorcycle.normalHeight;
     motorcycle.isRidingVehicle = false;
     motorcycle.ridingVehicle = null;
     
@@ -497,6 +498,9 @@ function spawnObstacle() {
             }
             
             const obstacleType = getRandomElement(availableTypes);
+            const vehicleColors = getRandomVehicleColors();
+            const vehiclePalette = createSpritePalette(vehicleColors);
+            
             obstacles.push({
                 x: canvas.width,
                 y: groundY - obstacleType.height,
@@ -505,7 +509,8 @@ function spawnObstacle() {
                 sprite: obstacleType.sprite,
                 type: obstacleType.type,
                 rideable: obstacleType.rideable,
-                flipH: false // Vehicles always face left (coming towards motorcycle)
+                flipH: false, // Vehicles always face left (coming towards motorcycle)
+                palette: vehiclePalette // Random vehicle color
             });
             
             // Calculate next spawn time with progressive difficulty
@@ -602,11 +607,9 @@ function updateMotorcycle() {
     // Handle ducking (only when not riding)
     if (!motorcycle.isRidingVehicle && keys['ArrowDown'] && !motorcycle.isJumping) {
         motorcycle.isDucking = true;
-        motorcycle.height = motorcycle.duckHeight;
         motorcycle.y = motorcycle.groundY + (motorcycle.normalHeight - motorcycle.duckHeight);
     } else if (!motorcycle.isJumping && !motorcycle.isRidingVehicle) {
         motorcycle.isDucking = false;
-        motorcycle.height = motorcycle.normalHeight;
         motorcycle.y = motorcycle.groundY;
     }
     
@@ -731,7 +734,7 @@ function drawObstacles() {
     obstacles.forEach(obstacle => {
         const sprite = SPRITES[obstacle.sprite];
         if (sprite) {
-            drawSprite(sprite, obstacle.x, obstacle.y, CONFIG.SPRITE_SCALE, obstacle.flipH);
+            drawSprite(sprite, obstacle.x, obstacle.y, CONFIG.SPRITE_SCALE, obstacle.flipH, obstacle.palette);
         }
     });
     
@@ -866,14 +869,20 @@ function drawGround() {
 function drawScore() {
     // Interpolate text color between dark and white based on sky transition
     ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
+    
+    // Main score - larger font
     ctx.font = 'bold 18px Courier New';
     ctx.textAlign = 'center';
     ctx.fillText(`Score: ${score}`, canvas.width / 2, 30);
-    ctx.fillText(`Best Today: ${dailyHighScore}`, canvas.width / 2, 52);
-    ctx.fillText(`Best Ever: ${allTimeHighScore}`, canvas.width / 2, 74);
+    
+    // Daily/all-time scores - half the size
+    ctx.font = '9px Courier New';
+    ctx.fillText(`Best Today: ${dailyHighScore}`, canvas.width / 2, 44);
+    ctx.fillText(`Best Ever: ${allTimeHighScore}`, canvas.width / 2, 56);
     
     // Debug mode - show FPS and speed
     if (CONFIG.DEBUG_MODE) {
+        ctx.font = 'bold 18px Courier New';
         ctx.textAlign = 'left';
         ctx.fillText(`Speed: ${gameSpeed.toFixed(1)}`, 20, 30);
     }
