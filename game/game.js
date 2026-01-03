@@ -7,7 +7,8 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const gameOverlay = document.getElementById('gameOverlay');
 const finalScoreEl = document.getElementById('finalScore');
-const highScoreEl = document.getElementById('highScore');
+const dailyHighScoreEl = document.getElementById('dailyHighScore');
+const allTimeHighScoreEl = document.getElementById('allTimeHighScore');
 const restartBtn = document.getElementById('restartBtn');
 const orientationOverlay = document.getElementById('orientationOverlay');
 
@@ -597,7 +598,8 @@ function updateMotorcycle() {
         } else {
             // Lock motorcycle Y position to top of vehicle
             const rideHeight = 1; // Minimal offset above vehicle
-            motorcycle.y = vehicle.y - motorcycle.height - rideHeight;
+            const currentHeight = motorcycle.isDucking ? motorcycle.duckHeight : motorcycle.normalHeight;
+            motorcycle.y = vehicle.y - currentHeight - rideHeight;
             
             // Player can jump while riding
             // (handled by handleJump function)
@@ -698,7 +700,8 @@ function gameOver() {
     }
     
     finalScoreEl.textContent = `Score: ${score}`;
-    highScoreEl.textContent = `High Score: ${highScore}`;
+    dailyHighScoreEl.textContent = `Best Today: ${dailyHighScore}`;
+    allTimeHighScoreEl.textContent = `Best Ever: ${allTimeHighScore}`;
     gameOverlay.style.display = 'block';
 }
 
@@ -870,15 +873,15 @@ function drawScore() {
     // Interpolate text color between dark and white based on sky transition
     ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
     
-    // Main score - larger font
+    // Main score - larger font, bold
     ctx.font = 'bold 18px Courier New';
     ctx.textAlign = 'center';
     ctx.fillText(`Score: ${score}`, canvas.width / 2, 30);
     
-    // Daily/all-time scores - half the size
-    ctx.font = '9px Courier New';
-    ctx.fillText(`Best Today: ${dailyHighScore}`, canvas.width / 2, 44);
-    ctx.fillText(`Best Ever: ${allTimeHighScore}`, canvas.width / 2, 56);
+    // Daily/all-time scores - 2/3 the size (12px), not bold
+    ctx.font = '12px Courier New';
+    ctx.fillText(`Best Today: ${dailyHighScore}`, canvas.width / 2, 46);
+    ctx.fillText(`Best Ever: ${allTimeHighScore}`, canvas.width / 2, 62);
     
     // Debug mode - show FPS and speed
     if (CONFIG.DEBUG_MODE) {
@@ -890,7 +893,7 @@ function drawScore() {
 
 function drawVersion() {
     ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
-    ctx.font = '10px Courier New';
+    ctx.font = '14px Courier New';
     ctx.textAlign = 'right';
     ctx.fillText(VERSION, canvas.width - 10, canvas.height - 10);
 }
