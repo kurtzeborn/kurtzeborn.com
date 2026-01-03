@@ -1,4 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
+// Version 0.3
+
+const VERSION = 'v0.3';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -129,6 +132,25 @@ const GAME_STATES = {
 let gameState = GAME_STATES.WAITING;
 let score = 0;
 let highScore = parseInt(localStorage.getItem('motorcycleHighScore')) || 0;
+let dailyHighScore = 0;
+let allTimeHighScore = parseInt(localStorage.getItem('motorcycleAllTimeHighScore')) || 0;
+
+// Load daily high score (reset if it's a new day)
+function loadDailyHighScore() {
+    const today = new Date().toDateString();
+    const lastPlayDate = localStorage.getItem('motorcycleLastPlayDate');
+    
+    if (lastPlayDate === today) {
+        dailyHighScore = parseInt(localStorage.getItem('motorcycleDailyHighScore')) || 0;
+    } else {
+        // New day, reset daily high score
+        dailyHighScore = 0;
+        localStorage.setItem('motorcycleLastPlayDate', today);
+        localStorage.setItem('motorcycleDailyHighScore', '0');
+    }
+}
+
+loadDailyHighScore();
 let frameCount = 0;
 let gameSpeed = CONFIG.INITIAL_SPEED;
 let collisionFlash = 0;
@@ -569,7 +591,7 @@ function updateMotorcycle() {
             motorcycle.velocityY = 0; // Start falling from current position
         } else {
             // Lock motorcycle Y position to top of vehicle
-            const rideHeight = 5; // Small offset above vehicle
+            const rideHeight = 1; // Minimal offset above vehicle
             motorcycle.y = vehicle.y - motorcycle.height - rideHeight;
             
             // Player can jump while riding
@@ -656,9 +678,20 @@ function gameOver() {
     gameState = GAME_STATES.GAME_OVER;
     collisionFlash = CONFIG.COLLISION_FLASH_DURATION;
     
+    // Update high scores
     if (score > highScore) {
         highScore = score;
         localStorage.setItem('motorcycleHighScore', highScore);
+    }
+    
+    if (score > dailyHighScore) {
+        dailyHighScore = score;
+        localStorage.setItem('motorcycleDailyHighScore', dailyHighScore);
+    }
+    
+    if (score > allTimeHighScore) {
+        allTimeHighScore = score;
+        localStorage.setItem('motorcycleAllTimeHighScore', allTimeHighScore);
     }
     
     finalScoreEl.textContent = `Score: ${score}`;
@@ -833,16 +866,24 @@ function drawGround() {
 function drawScore() {
     // Interpolate text color between dark and white based on sky transition
     ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
-    ctx.font = 'bold 24px Courier New';
+    ctx.font = 'bold 18px Courier New';
     ctx.textAlign = 'center';
-    ctx.fillText(`Score: ${score}`, canvas.width / 2, 40);
-    ctx.fillText(`HI: ${highScore}`, canvas.width / 2, 70);
+    ctx.fillText(`Score: ${score}`, canvas.width / 2, 30);
+    ctx.fillText(`Best Today: ${dailyHighScore}`, canvas.width / 2, 52);
+    ctx.fillText(`Best Ever: ${allTimeHighScore}`, canvas.width / 2, 74);
     
     // Debug mode - show FPS and speed
     if (CONFIG.DEBUG_MODE) {
         ctx.textAlign = 'left';
-        ctx.fillText(`Speed: ${gameSpeed.toFixed(1)}`, 20, 40);
+        ctx.fillText(`Speed: ${gameSpeed.toFixed(1)}`, 20, 30);
     }
+}
+
+function drawVersion() {
+    ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
+    ctx.font = '10px Courier New';
+    ctx.textAlign = 'right';
+    ctx.fillText(VERSION, canvas.width - 10, canvas.height - 10);
 }
 
 function drawDebugHitboxes() {
@@ -897,6 +938,7 @@ function draw() {
     drawMotorcycle();
     drawObstacles();
     drawScore();
+    drawVersion();
     drawDebugHitboxes();
 }
 
