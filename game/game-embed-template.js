@@ -220,23 +220,17 @@
     function initializeGame() {
         // Close button handler
         const closeBtn = document.getElementById('motorcycle-close-btn');
-        const instructionsEl = document.getElementById('motorcycle-instructions');
         
         closeBtn.addEventListener('click', hideGame);
         
-        // Hide close button and instructions when game starts (hook into startGame)
-        const originalStartGame = window.startGame;
-        window.startGame = function() {
+        // Listen for game events to manage close button visibility
+        window.addEventListener('motorcyclegamestart', () => {
             closeBtn.style.display = 'none';
-            originalStartGame();
-        };
+        });
         
-        // Show close button and instructions on game over
-        const originalGameOver = window.gameOver;
-        window.gameOver = function() {
+        window.addEventListener('motorcyclegameover', () => {
             closeBtn.style.display = 'block';
-            originalGameOver();
-        };
+        });
         
         // Embed sprites.js and game.js content inline
         (function() {

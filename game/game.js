@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
 // CODE REVIEW: Always increment version number before making changes
 
-const VERSION = 'v0.15';
+const VERSION = 'v0.16';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -511,6 +511,10 @@ function startGame() {
     
     gameState = GAME_STATES.PLAYING;
     instructionsEl.style.display = 'none';
+    
+    // Dispatch custom event for embed wrapper to handle UI
+    window.dispatchEvent(new CustomEvent('motorcyclegamestart'));
+    
     score = 0;
     frameCount = 0;
     sunX = canvas.width - CONFIG.SUN_START_X;
@@ -849,6 +853,9 @@ function gameOver() {
     dailyHighScoreEl.textContent = `Best Today: ${dailyHighScore}`;
     allTimeHighScoreEl.textContent = `Best Ever: ${allTimeHighScore}`;
     gameOverlay.style.display = 'block';
+    
+    // Dispatch custom event for embed wrapper to handle UI
+    window.dispatchEvent(new CustomEvent('motorcyclegameover'));
 }
 
 function drawMotorcycle() {
