@@ -1,8 +1,8 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
-// Version 0.13
+// Version 0.14
 // CODE REVIEW: Always increment version number before making changes
 
-const VERSION = 'v0.13';
+const VERSION = 'v0.14';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
