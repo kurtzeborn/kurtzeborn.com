@@ -1,83 +1,54 @@
-# Motorcycle Runner Game
+# Motorcycle Runner
 
-A Chrome T-Rex inspired endless runner game featuring a motorcycle instead of a dinosaur.
+Chrome T-Rex inspired endless runner game with motorcycle theme.
 
 ## Features
 
-- **Responsive Controls**: Jump, duck, and avoid obstacles
-- **Progressive Difficulty**: Game speed increases over time
-- **Multiple Obstacle Types**: Ground obstacles (cacti) and flying obstacles (birds)
-- **Score Tracking**: Local high score persistence
-- **Mobile Support**: Touch controls for mobile devices
-- **Retro Aesthetic**: Styled to match the site's retro theme
+- Jump and duck to avoid obstacles
+- Progressive difficulty (speed increases over time)
+- Ground obstacles (cacti) and flying obstacles (birds)
+- High score tracking
+- Mobile and desktop support
+- Embeddable on any website
 
 ## Controls
 
-### Desktop
-- `SPACE` or `↑` - Jump
-- `↓` - Duck (to avoid flying obstacles)
+**Desktop:** SPACE/↑ to jump, ↓ to duck  
+**Mobile:** Tap top half to jump, hold bottom half to duck
 
-### Mobile/Touch
-- Tap screen - Jump
-- Swipe down - Duck
+## Embedding
 
-## Game Mechanics
+Add to any website with one line:
 
-- **Scoring**: 
-  - Ground obstacles: +10 points each
-  - Flying obstacles: +15 points each
-- **Difficulty**: Speed increases every 300 frames (~5 seconds)
-- **Flying Obstacles**: Appear after reaching 100 points
+```html
+<script src="https://kurtzeborn.net/game/game-embed.js"></script>
+```
 
-## Technical Details
+Press SPACEBAR to launch game overlay. See [EMBED.md](EMBED.md) for details.
 
-### Pixel Art Sprites
-- **Canvas-based rendering**: Sprites defined as 2D arrays with indexed colors
-- **20x16 pixel motorcycle** with normal and ducking poses
-- **Cactus variations**: 3 different sizes and shapes
-- **Animated birds**: Wing flapping with alternating frames
-- **3x scaling**: Crisp retro look at 60x48 effective size
+## Development
 
-### Configuration
-All game constants are centralized in the `CONFIG` object for easy tuning:
-- Initial speed and difficulty progression
-- Obstacle spawn distances and frequencies
-- Point values and scoring
-- Sprite scaling
-- Particle system parameters
-- Debug mode toggle
+**Building the embed:**
 
-### Code Organization
-- **Collision detection**: Optimized AABB algorithm with proper hitboxes
-- **Particle system**: Physics-based dust clouds with gravity and fade
-- **Sprite management**: Helper functions for dimensions and rendering
-- **Visual feedback**: Collision flash effect
-- **Mobile support**: Touch controls with swipe detection
-- **Separated concerns**: Clean separation of update logic, rendering, and input handling
-- **Color constants**: Easy theming with indexed color palette
+```bash
+cd game
+.\build-embed.ps1  # Bundles sprites.js + game.js into game-embed.js
+```
 
-### Performance Optimizations
-- Efficient sprite rendering with pixel-perfect scaling
-- Smart hitbox calculations (70% of sprite size)
-- Particle cleanup on game restart
-- Optimized collision checks with early returns
+Run after editing:
+- `game.js` - Game logic
+- `sprites.js` - Sprite data
+- `game-embed-template.js` - Wrapper/overlay
 
-### Debug Mode
-Set `CONFIG.DEBUG_MODE = true` to enable:
-- Hitbox visualization (red for motorcycle, green for obstacles)
-- Current game speed display
-- Helpful for tuning collision detection
+**Debug mode:** Set `CONFIG.DEBUG_MODE = true` in game.js to show hitboxes and FPS.
 
 ## Files
 
-- `index.html` - Game page with embedded styles
-- `game.js` - Complete game engine
-- `README.md` - This file
-
-## Future Enhancements
-
-- Sound effects
-- Additional obstacle types
-- Power-ups
-- Day/night theme transitions
-- Particle effects for collisions
+- `game.js` - Main game engine
+- `sprites.js` - Pixel art sprite definitions
+- `game-embed.js` - Bundled embeddable version (auto-generated)
+- `game-embed-template.js` - IIFE wrapper template
+- `build-embed.ps1` - Build script
+- `index.html` - Demo page
+- `CONTRIBUTING.md` - Code guidelines
+- `EMBED.md` - Embedding documentation

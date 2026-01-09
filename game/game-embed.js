@@ -266,9 +266,22 @@ const VEHICLE_COLORS = [
     { body: '#4169E1', detail: '#1E3A8A' }  // Blue
 ];
 
-// Function to get random vehicle colors
+// Track last vehicle color to avoid repetition
+let lastVehicleColorIndex = -1;
+
+// Function to get random vehicle colors (avoids repeating the same color)
 function getRandomVehicleColors() {
-    return VEHICLE_COLORS[Math.floor(Math.random() * VEHICLE_COLORS.length)];
+    let colorIndex;
+    // If we have more than one color option, avoid repeating the last one
+    if (VEHICLE_COLORS.length > 1) {
+        do {
+            colorIndex = Math.floor(Math.random() * VEHICLE_COLORS.length);
+        } while (colorIndex === lastVehicleColorIndex);
+    } else {
+        colorIndex = 0;
+    }
+    lastVehicleColorIndex = colorIndex;
+    return VEHICLE_COLORS[colorIndex];
 }
 
 // Function to create sprite palette with vehicle colors
@@ -486,10 +499,10 @@ const SPRITES = {
 
             
             // Motorcycle Runner Game - Chrome T-Rex Style
-// Version 0.12
+// Version 0.13
 // CODE REVIEW: Always increment version number before making changes
 
-const VERSION = 'v0.12';
+const VERSION = 'v0.13';
 
 const canvas = document.getElementById('motorcycle-runner-canvas');
 const ctx = canvas.getContext('2d');
@@ -503,43 +516,52 @@ const instructionsEl = document.getElementById('motorcycle-instructions');
 
 // Game configuration constants
 const CONFIG = {
-    // Speed and difficulty
+    // === GAME SPEED & DIFFICULTY ===
     INITIAL_SPEED: 6,
     SPEED_INCREMENT: 0.5,
     SPEED_INCREASE_INTERVAL: 300,
     
-    // Point values
+    // === SCORING ===
     SURVIVAL_POINTS_INTERVAL: 5, // Award 1 point every N frames
     VEHICLE_POINTS: 50,
     RIDEABLE_VEHICLE_POINTS: 100,
     FLYING_OBSTACLE_POINTS: 75,
+    RIDEABLE_VEHICLE_MIN_SCORE: 300,
+    FLYING_OBSTACLE_MIN_SCORE: 100,
     
-    // Spawn timing
+    // === OBSTACLE SPAWNING - GROUND VEHICLES ===
     OBSTACLE_MIN_INTERVAL: 60,
     OBSTACLE_MAX_INTERVAL: 120,
     OBSTACLE_INTERVAL_DECREASE_RATE: 0.5,
     OBSTACLE_MIN_INTERVAL_CAP: 40,
+    GROUND_INTERVAL_MIN_SPACING: 30,
+    OBSTACLE_RETRY_DELAY: 20,
+    
+    // === OBSTACLE SPAWNING - FLYING (BIRDS) ===
     FLYING_OBSTACLE_MIN_INTERVAL: 100,
     FLYING_OBSTACLE_MAX_INTERVAL: 200,
-    FLYING_OBSTACLE_MIN_SCORE: 100,
-    RIDEABLE_VEHICLE_MIN_SCORE: 300,
     FLYING_OBSTACLE_SPEED_MULTIPLIER: 1.2,
+    FLYING_INTERVAL_MIN_CAP: 60,
+    FLYING_INTERVAL_MIN_SPACING: 50,
+    BIRD_WING_FLAP_FRAME_INTERVAL: 10,
+    SAFE_DISTANCE_BIRD_VEHICLE: 300,
+    
+    // === PLAYER PHYSICS ===
+    FAST_FALL_GRAVITY: 2.5, // Extra gravity when ducking mid-air
+    HITBOX_SIZE_RATIO: 0.7,
+    
+    // === VISUAL EFFECTS ===
+    SPRITE_SCALE: 3,
+    PARTICLE_SPAWN_INTERVAL: 5,
+    COLLISION_FLASH_DURATION: 10,
+    
+    // === GROUND RENDERING ===
     GROUND_ROAD_WIDTH: 40,
     GROUND_DASH_SPACING: 40,
     GROUND_DASH_LENGTH: 20,
     CENTER_LINE_WIDTH: 3,
-    SPRITE_SCALE: 3,
-    PARTICLE_SPAWN_INTERVAL: 5,
-    COLLISION_FLASH_DURATION: 10,
-    BIRD_WING_FLAP_FRAME_INTERVAL: 10,
-    HITBOX_SIZE_RATIO: 0.7,
-    SAFE_DISTANCE_BIRD_VEHICLE: 300,
-    OBSTACLE_RETRY_DELAY: 20,
-    GROUND_INTERVAL_MIN_SPACING: 30,
-    FLYING_INTERVAL_MIN_CAP: 60,
-    FLYING_INTERVAL_MIN_SPACING: 50,
-    DEBUG_MODE: false, // Set to true to see hitboxes
-    // Day/night cycle configuration
+    
+    // === SKY & DAY/NIGHT CYCLE ===
     SKY_DAY_COLOR: '#87CEEB',
     SKY_NIGHT_COLOR: '#1a1a2e',
     SKY_TRANSITION_SPEED: 0.01,
@@ -554,7 +576,10 @@ const CONFIG = {
     STAR_MIN_SPEED: 0.05,
     STAR_MAX_SPEED: 0.15,
     STAR_MIN_OPACITY: 0.5,
-    STAR_MAX_OPACITY: 1.0
+    STAR_MAX_OPACITY: 1.0,
+    
+    // === DEBUG ===
+    DEBUG_MODE: false // Set to true to see hitboxes
 };
 
 // Note: COLORS and SPRITE_PALETTE are defined in sprites.js
@@ -717,7 +742,7 @@ const obstacleTypes = getObstacleTypes();
 let flyingObstacles = [];
 const flyingObstacleConfig = {
     ...getSpriteDimensions(SPRITES.BIRD_UP),
-    heightVariations: [-100, -120, -140] // relative to groundY
+    heightVariations: [-140, -120, -100, -60, -40] // Mix of high (jump over) and low (duck under) birds
 };
 
 // Billboards
@@ -953,11 +978,9 @@ canvas.addEventListener('touchstart', (e) => {
         
         // Touch bottom half to duck, top half to jump
         if (touchYRelative > canvasHalfHeight) {
-            // Duck - hold finger down
-            if (!motorcycle.isJumping) {
-                isTouchDucking = true;
-                keys['ArrowDown'] = true;
-            }
+            // Duck - hold finger down (works on ground or mid-air for fast-fall)
+            isTouchDucking = true;
+            keys['ArrowDown'] = true;
         } else {
             // Jump - tap top half (reuses keyboard jump logic)
             performJump();
@@ -1239,7 +1262,9 @@ function updateMotorcycle() {
     
     // Apply gravity
     if (motorcycle.isJumping) {
-        motorcycle.velocityY += motorcycle.gravity;
+        // Apply extra gravity for fast-fall when ducking mid-air
+        const gravityMultiplier = keys['ArrowDown'] ? CONFIG.FAST_FALL_GRAVITY : motorcycle.gravity;
+        motorcycle.velocityY += gravityMultiplier;
         motorcycle.y += motorcycle.velocityY;
         
         // Land on ground

@@ -26,9 +26,22 @@ const VEHICLE_COLORS = [
     { body: '#4169E1', detail: '#1E3A8A' }  // Blue
 ];
 
-// Function to get random vehicle colors
+// Track last vehicle color to avoid repetition
+let lastVehicleColorIndex = -1;
+
+// Function to get random vehicle colors (avoids repeating the same color)
 function getRandomVehicleColors() {
-    return VEHICLE_COLORS[Math.floor(Math.random() * VEHICLE_COLORS.length)];
+    let colorIndex;
+    // If we have more than one color option, avoid repeating the last one
+    if (VEHICLE_COLORS.length > 1) {
+        do {
+            colorIndex = Math.floor(Math.random() * VEHICLE_COLORS.length);
+        } while (colorIndex === lastVehicleColorIndex);
+    } else {
+        colorIndex = 0;
+    }
+    lastVehicleColorIndex = colorIndex;
+    return VEHICLE_COLORS[colorIndex];
 }
 
 // Function to create sprite palette with vehicle colors
