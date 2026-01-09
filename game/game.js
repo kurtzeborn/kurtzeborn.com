@@ -1,7 +1,8 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
-// Version 0.10
+// Version 0.11
+// CODE REVIEW: Always increment version number before making changes
 
-const VERSION = 'v0.10';
+const VERSION = 'v0.11';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -143,6 +144,7 @@ const GAME_STATES = {
 // Game state
 let gameState = GAME_STATES.WAITING;
 let score = 0;
+// CODE REVIEW: Always parseInt() localStorage values (they're strings)
 let highScore = parseInt(localStorage.getItem('motorcycleHighScore')) || 0;
 let dailyHighScore = 0;
 let allTimeHighScore = parseInt(localStorage.getItem('motorcycleAllTimeHighScore')) || 0;
@@ -408,7 +410,7 @@ function isObstacleTooClose(obstacleArray) {
     return false;
 }
 
-// Jump function - centralized logic for both keyboard and touch
+// CODE REVIEW: Game actions should be centralized functions (not duplicated in keyboard/touch)
 function performJump() {
     if (!motorcycle.isJumping && !motorcycle.isDucking) {
         motorcycle.velocityY = motorcycle.jumpPower;
@@ -435,7 +437,7 @@ document.addEventListener('keydown', (e) => {
         }
     }
     
-    // Prevent default behavior for game keys
+    // CODE REVIEW: Always preventDefault() for game input keys to avoid page scroll
     if (['Space', 'ArrowUp', 'ArrowDown'].includes(e.code)) {
         e.preventDefault();
     }
@@ -492,6 +494,7 @@ restartBtn.addEventListener('click', () => {
 });
 
 function startGame() {
+    // CODE REVIEW: Ensure ALL game state variables are reset here
     // Check orientation on mobile before starting
     if (!checkOrientation()) {
         return; // Require landscape orientation on mobile devices
@@ -1112,7 +1115,7 @@ function draw() {
         return;
     }
     
-    // Draw game elements (back to front)
+    // CODE REVIEW: Draw order must be back-to-front (stars → sky → billboards → ground → particles → player → obstacles → UI)
     drawStars();
     drawSkyObject();
     drawBillboards(); // Draw billboards before ground so they appear in background
