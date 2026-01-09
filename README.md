@@ -1,97 +1,39 @@
 # kurtzeborn.com
 
-Source code for my family site hosted on GitHub Pages.
+Family sites automatically deployed to GitHub Pages and Azure Static Web Apps.
 
-**Live Site:** https://kurtzeborn.github.io/kurtzeborn.com/
+**Live Sites:**
+- https://kurtzeborn.net (Azure)
+- https://kurtzeborn.github.io/kurtzeborn.com/ (GitHub Pages)
 
-## Repository Structure
+## How to Update the Sites
 
-- **`master` branch** - Source code and development
-  - `game/` - Motorcycle Runner game
-  - `scott.kurtzeborn.com/` - Personal profile site
-  
-- **`gh-pages` branch** - Published website (auto-deployed to GitHub Pages)
-  - `index.html` - Landing page
-  - `game/` - Published game
-  - `scott.kurtzeborn.com/` - Published profile
-
-## How to Update the Site
-
-### 1. Make Changes on Master Branch
-
-Edit files in the `master` branch as usual:
+Make changes on the `master` branch and push - everything deploys automatically:
 
 ```bash
-# Make your changes to game/ or scott.kurtzeborn.com/
 git add .
-git commit -m "Your commit message"
+git commit -m "Your changes"
 git push origin master
 ```
 
-### 2. Update GitHub Pages
+GitHub Actions will automatically:
+- Deploy to GitHub Pages (gh-pages branch)
+- Deploy to Azure Static Web Apps
 
-After pushing changes to `master`, update the `gh-pages` branch:
-
-```bash
-# Switch to gh-pages branch
-git checkout gh-pages
-
-# Pull the updated files from master
-git checkout master -- game scott.kurtzeborn.com
-
-# Commit and push
-git add .
-git commit -m "Update site from master"
-git push origin gh-pages
-
-# Switch back to master
-git checkout master
-```
-
-The site will automatically update at https://kurtzeborn.github.io/kurtzeborn.com/ within a few minutes.
-
-### 3. Update Landing Page (Optional)
-
-If you need to modify the landing page (`index.html`):
-
-```bash
-# Switch to gh-pages branch
-git checkout gh-pages
-
-# Edit index.html
-# ... make your changes ...
-
-git add index.html
-git commit -m "Update landing page"
-git push origin gh-pages
-
-# Switch back to master
-git checkout master
-```
+Changes are live within a few minutes.
 
 ## Project Contents
 
 ### Motorcycle Runner (`game/`)
 A browser-based endless runner game inspired by Chrome's T-Rex game. Built with vanilla JavaScript and HTML5 Canvas.
 
-- **Play:** https://kurtzeborn.github.io/kurtzeborn.com/game/
-- **Documentation:** See `game/README.md` and `game/CONTRIBUTING.md`
+**Features:**
+- Embeddable on any website with one line: `<script src="https://kurtzeborn.net/game/game-embed.js"></script>`
+- Press SPACEBAR to launch game overlay
+- Works on mobile and desktop
 
-### Scott's Profile (`scott.kurtzeborn.com/`)
-Personal profile site with resume and contact information.
+**Documentation:** See [game/README.md](game/README.md) and [game/CONTRIBUTING.md](game/CONTRIBUTING.md)
 
-- **View:** https://kurtzeborn.github.io/kurtzeborn.com/scott.kurtzeborn.com/
-
-## Quick Reference
-
-```bash
-# View current branch
-git branch
-
-# Switch branches
-git checkout master       # Source code
-git checkout gh-pages     # Published site
-
-# Update published site from source
-git checkout gh-pages && git checkout master -- game scott.kurtzeborn.com && git add . && git commit -m "Sync from master" && git push && git checkout master
-```
+### Family Sites
+- **kurtzeborn.com/** - Family domain landing page
+- **scott.kurtzeborn.com/** - Personal profile and resume

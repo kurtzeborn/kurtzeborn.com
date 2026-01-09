@@ -18,6 +18,7 @@
 
 ### Commit Standards
 - Always include version number in commit message for game changes
+- **Keep commit messages concise** - 3-5 bullet points max
 - Use descriptive commit messages explaining what changed and why
 - Stage all related files together
 
