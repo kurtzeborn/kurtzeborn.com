@@ -1,6 +1,5 @@
 /**
  * Motorcycle Runner - Embeddable Game
- * Version 0.12
  * 
  * Usage: <script src="https://kurtzeborn.net/game/game-embed.js"></script>
  * 
@@ -126,7 +125,7 @@
                 
                 .motorcycle-close-button {
                     position: absolute;
-                    bottom: 20px;
+                    top: 20px;
                     left: 20px;
                     background: rgba(255, 0, 0, 0.7);
                     color: white;
@@ -221,7 +220,23 @@
     function initializeGame() {
         // Close button handler
         const closeBtn = document.getElementById('motorcycle-close-btn');
+        const instructionsEl = document.getElementById('motorcycle-instructions');
+        
         closeBtn.addEventListener('click', hideGame);
+        
+        // Hide close button and instructions when game starts (hook into startGame)
+        const originalStartGame = window.startGame;
+        window.startGame = function() {
+            closeBtn.style.display = 'none';
+            originalStartGame();
+        };
+        
+        // Show close button and instructions on game over
+        const originalGameOver = window.gameOver;
+        window.gameOver = function() {
+            closeBtn.style.display = 'block';
+            originalGameOver();
+        };
         
         // Embed sprites.js and game.js content inline
         (function() {
