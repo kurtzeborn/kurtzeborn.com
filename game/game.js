@@ -190,12 +190,13 @@ let nextBillboardFrame = 600; // First billboard at 10 seconds (600 frames at 60
 
 // Billboard messages
 const BILLBOARD_MESSAGES = [
-    ['EASTSIDE', 'HARLEY'],
-    ['EMERALD CITY', 'HARLEY'],
-    ['H-D', 'MOTORCYCLES'],
-    ['KEEP ON', 'RIDING!'],
+    ['Eastside', 'Harley'],
+    ['Emerald City', 'Harley'],
+    ['Harley', 'Davidson', 'Motorcycles'],
+    ['Life is', 'short, roads', 'are long.'],
+    ['Two wheels,', 'One love', '#BikerLife'],
     ['YOU GOT', 'THIS!'],
-    ['LOOKING', 'GOOD!'],
+    ['Eat.  Sleep.', 'Ride.', 'Repeat.'],
     ['NICE', 'MOVES!'],
     ['LEGENDARY!'],
     ['STAY', 'FOCUSED!'],
@@ -203,7 +204,6 @@ const BILLBOARD_MESSAGES = [
     ['RIDE ON!'],
     ['SKILLED', 'RIDER!'],
     ['TOO FAST!'],
-    ['INCREDIBLE!'],
     ['BEAST', 'MODE!'],
     ['DANGER', 'ZONE!']
 ];
@@ -921,10 +921,15 @@ function drawBillboards() {
         if (billboard.message.length === 1) {
             // Single line - center vertically
             ctx.fillText(billboard.message[0], centerX, centerY);
-        } else {
-            // Two lines - split vertically
+        } else if (billboard.message.length === 2) {
+            // Two lines - centered vertically
             ctx.fillText(billboard.message[0], centerX, centerY - 12);
             ctx.fillText(billboard.message[1], centerX, centerY + 12);
+        } else if (billboard.message.length === 3) {
+            // Three lines - evenly spaced
+            ctx.fillText(billboard.message[0], centerX, centerY - 18);
+            ctx.fillText(billboard.message[1], centerX, centerY);
+            ctx.fillText(billboard.message[2], centerX, centerY + 18);
         }
     });
 }
