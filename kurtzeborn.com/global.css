@@ -103,14 +103,6 @@ h1 {
 	font-size: 112.5%;
 }
 
-.nav-link {
-	font-size: 75%;
-}
-
-.me {
-	font-size: 87.5%;
-}
-
 /* Margin */
 
 .content-border {
@@ -171,7 +163,7 @@ h1 {
 }
 /* Position */
 
-.heading, .content-nav, .content {
+.heading, .content {
 	position: relative;
 }
 
