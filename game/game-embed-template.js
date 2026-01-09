@@ -126,7 +126,7 @@
                 
                 .motorcycle-close-button {
                     position: absolute;
-                    top: 20px;
+                    bottom: 20px;
                     left: 20px;
                     background: rgba(255, 0, 0, 0.7);
                     color: white;
