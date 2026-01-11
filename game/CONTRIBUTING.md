@@ -32,6 +32,7 @@ Before submitting changes:
 - [ ] Descriptive variable names (especially for coordinates and calculations)
 - [ ] No hard-coded scales or dimensions
 - [ ] Visual feedback for new game events
+- [ ] JSDoc comments added for complex functions
 
 **Location-specific reminders are in code comments marked with "CODE REVIEW:"**
 

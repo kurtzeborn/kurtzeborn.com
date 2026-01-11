@@ -32,6 +32,26 @@ foreach ($replacement in $replacements) {
     $processedGameContent = $processedGameContent.Replace($replacement[0], $replacement[1])
 }
 
+# Function to strip comments from JavaScript code
+function Remove-JavaScriptComments {
+    param([string]$content)
+    
+    # Remove single-line comments (// ...) but preserve URLs (http://, https://)
+    $content = $content -replace '(?<!:)//(?!/)[^\r\n]*', ''
+    
+    # Remove multi-line comments (/* ... */)
+    $content = $content -replace '/\*[\s\S]*?\*/', ''
+    
+    # Clean up excessive blank lines (more than 2 consecutive blank lines)
+    $content = $content -replace '(\r?\n\s*){3,}', "`n`n"
+    
+    return $content
+}
+
+# Strip comments from sprites and game content
+$spritesContent = Remove-JavaScriptComments $spritesContent
+$processedGameContent = Remove-JavaScriptComments $processedGameContent
+
 # Build the embed file (inject raw content - no escaping needed since we're using direct injection)
 $embedContent = $templateContent `
     -replace '\$\{generateSpritesContent\(\)\}', $spritesContent `

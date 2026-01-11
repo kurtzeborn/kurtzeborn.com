@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
 // CODE REVIEW: Always increment version number before making changes
 
-const VERSION = 'v0.16';
+const VERSION = 'v0.17';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -27,6 +27,7 @@ const CONFIG = {
     FLYING_OBSTACLE_POINTS: 75,
     RIDEABLE_VEHICLE_MIN_SCORE: 300,
     FLYING_OBSTACLE_MIN_SCORE: 100,
+    DAY_NIGHT_BONUS: 500,
     
     // === OBSTACLE SPAWNING - GROUND VEHICLES ===
     OBSTACLE_MIN_INTERVAL: 60,
@@ -53,6 +54,7 @@ const CONFIG = {
     SPRITE_SCALE: 3,
     PARTICLE_SPAWN_INTERVAL: 5,
     COLLISION_FLASH_DURATION: 10,
+    BONUS_MESSAGE_DURATION: 300, // 5 seconds at 60fps
     
     // === GROUND RENDERING ===
     GROUND_ROAD_WIDTH: 40,
@@ -253,6 +255,8 @@ const groundY = canvas.height - 80;
 // Sun/moon position (crosses sky as game progresses)
 let sunX = 100;
 let isNightMode = false;
+let previousNightMode = false; // Track for detecting transitions
+let pendingDayNightBonus = false; // Track bonus pending after transition completes
 let skyTransition = 0; // 0 = day, 1 = night, crossfades between
 
 // Sky color constants for easy reference
@@ -278,7 +282,20 @@ let stars = [];
 // Particle system for visual effects
 let particles = [];
 
-// Interpolate between two hex colors
+// Floating bonus messages
+let bonusMessages = [];
+
+// ============================================================================
+// === UTILITY FUNCTIONS ===
+// ============================================================================
+
+/**
+ * Interpolates between two hex color values
+ * @param {string} color1 - First hex color (e.g., '#FF0000')
+ * @param {string} color2 - Second hex color (e.g., '#00FF00')
+ * @param {number} factor - Interpolation factor between 0 and 1
+ * @returns {string} Interpolated hex color
+ */
 function interpolateColor(color1, color2, factor) {
     const c1 = parseInt(color1.slice(1), 16);
     const c2 = parseInt(color2.slice(1), 16);
@@ -293,6 +310,10 @@ function interpolateColor(color1, color2, factor) {
     const b = Math.round(b1 + (b2 - b1) * factor);
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
+
+// ============================================================================
+// === CLASSES ===
+// ============================================================================
 
 class Particle {
     constructor(x, y, vx, vy, color, life) {
@@ -323,6 +344,52 @@ class Particle {
     }
 }
 
+class BonusMessage {
+    constructor(text, x, y, duration = CONFIG.BONUS_MESSAGE_DURATION) {
+        this.text = text;
+        this.x = x;
+        this.y = y;
+        this.duration = duration;
+        this.maxDuration = duration;
+        this.vy = -0.5; // Float upward slowly
+    }
+    
+    update() {
+        this.y += this.vy;
+        this.duration--;
+        return this.duration > 0;
+    }
+    
+    draw() {
+        // Fade in during first 20% and fade out during last 20%
+        let alpha = 1.0;
+        const fadeInTime = this.maxDuration * 0.2;
+        const fadeOutTime = this.maxDuration * 0.2;
+        
+        if (this.maxDuration - this.duration < fadeInTime) {
+            alpha = (this.maxDuration - this.duration) / fadeInTime;
+        } else if (this.duration < fadeOutTime) {
+            alpha = this.duration / fadeOutTime;
+        }
+        
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.font = 'bold 48px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Use same color pattern as scoreboard for visibility
+        ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
+        ctx.fillText(this.text, this.x, this.y);
+        
+        ctx.restore();
+    }
+}
+
+// ============================================================================
+// === INITIALIZATION & GAME STATE ===
+// ============================================================================
+
 function spawnDustParticle() {
     if (frameCount % CONFIG.PARTICLE_SPAWN_INTERVAL === 0 && !motorcycle.isJumping) {
         particles.push(new Particle(
@@ -351,7 +418,10 @@ function drawParticles() {
 // Key state
 const keys = {};
 
-// Utility functions
+// ============================================================================
+// === HELPER FUNCTIONS ===
+// ============================================================================
+
 function getRandomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
@@ -502,6 +572,14 @@ restartBtn.addEventListener('click', () => {
     startGame();
 });
 
+// ============================================================================
+// === GAME LIFECYCLE FUNCTIONS ===
+// ============================================================================
+
+/**
+ * Initializes and starts a new game
+ * Resets all game state variables and begins gameplay
+ */
 function startGame() {
     // CODE REVIEW: Ensure ALL game state variables are reset here
     // Check orientation on mobile before starting
@@ -519,6 +597,8 @@ function startGame() {
     frameCount = 0;
     sunX = canvas.width - CONFIG.SUN_START_X;
     isNightMode = false;
+    previousNightMode = false;
+    pendingDayNightBonus = false;
     skyTransition = 0;
     stars = [];
     gameSpeed = CONFIG.INITIAL_SPEED;
@@ -526,6 +606,7 @@ function startGame() {
     flyingObstacles = [];
     billboards = [];
     particles = [];
+    bonusMessages = [];
     collisionFlash = 0;
     landingAnimation = 0;
     motorcycle.y = motorcycle.groundY;
@@ -547,7 +628,16 @@ function startGame() {
     gameLoop();
 }
 
-// Spawn convoy vehicles behind a lead vehicle
+// ============================================================================
+// === SPAWNING FUNCTIONS ===
+// ============================================================================
+
+/**
+ * Spawns a convoy of multiple vehicles in sequence
+ * @param {Object} leadVehicle - The first vehicle in the convoy
+ * @param {number} minCount - Minimum number of vehicles
+ * @param {number} maxCount - Maximum number of vehicles
+ */
 function spawnConvoy(leadVehicle, minCount, maxCount) {
     const count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
     const smallVehicleTypes = obstacleTypes.filter(type => 
@@ -584,6 +674,10 @@ function spawnConvoy(leadVehicle, minCount, maxCount) {
     lastConvoyEndX = lastVehicleEndX;
 }
 
+/**
+ * Main obstacle spawning logic
+ * Handles timing, variety, and placement of ground and flying obstacles
+ */
 function spawnObstacle() {
     // Spawn ground obstacle (vehicle) when it's time
     if (frameCount >= nextGroundObstacleFrame) {
@@ -692,6 +786,10 @@ function spawnObstacle() {
     }
 }
 
+// ============================================================================
+// === UPDATE FUNCTIONS ===
+// ============================================================================
+
 function updateObstacles() {
     // Update ground obstacles (vehicles)
     // Vehicles move slightly faster than road to appear traveling in opposite direction
@@ -787,6 +885,10 @@ function updateMotorcycle() {
     }
 }
 
+/**
+ * Checks for collisions between motorcycle and obstacles
+ * Handles both ground vehicles and flying obstacles (birds)
+ */
 function checkCollisions() {
     const motorHitbox = getMotorcycleHitbox();
     
@@ -857,6 +959,10 @@ function gameOver() {
     // Dispatch custom event for embed wrapper to handle UI
     window.dispatchEvent(new CustomEvent('motorcyclegameover'));
 }
+
+// ============================================================================
+// === DRAW FUNCTIONS ===
+// ============================================================================
 
 function drawMotorcycle() {
     // Show landing animation (duck sprite for 5 frames), otherwise show normal state
@@ -1002,6 +1108,10 @@ function updateStars() {
     });
 }
 
+/**
+ * Updates day/night cycle and awards bonus after transition completes
+ * Manages sun/moon movement, sky color transitions, and star visibility
+ */
 function updateDayNightCycle() {
     // Move sun/moon across sky
     sunX -= CONFIG.SUN_MOON_SPEED;
@@ -1013,6 +1123,13 @@ function updateDayNightCycle() {
             initializeStars();
         }
         sunX = canvas.width - CONFIG.SUN_START_X;
+        
+        // Set flag to award bonus after transition completes (but not on first transition)
+        if (previousNightMode !== isNightMode && score > 0) {
+            pendingDayNightBonus = true;
+        }
+        
+        previousNightMode = isNightMode;
     }
     
     // Gradually transition sky color (crossfade)
@@ -1021,6 +1138,18 @@ function updateDayNightCycle() {
         skyTransition = Math.min(skyTransition + CONFIG.SKY_TRANSITION_SPEED, targetTransition);
     } else if (skyTransition > targetTransition) {
         skyTransition = Math.max(skyTransition - CONFIG.SKY_TRANSITION_SPEED, targetTransition);
+    }
+    
+    // Award bonus and show message after transition is complete
+    if (pendingDayNightBonus && skyTransition === targetTransition) {
+        score += CONFIG.DAY_NIGHT_BONUS;
+        
+        // Create bonus message in center of sky
+        const centerX = canvas.width / 2;
+        const centerY = groundY / 3; // Position in upper third of sky
+        bonusMessages.push(new BonusMessage('Bonus +500', centerX, centerY));
+        
+        pendingDayNightBonus = false;
     }
     
     // Update stars during night
@@ -1146,11 +1275,19 @@ function draw() {
     drawParticles();
     drawMotorcycle();
     drawObstacles();
+    
+    // Draw bonus messages (after obstacles but before UI)
+    bonusMessages.forEach(m => m.draw());
+    
     drawScore();
     drawVersion();
     drawDebugHitboxes();
 }
 
+/**
+ * Main update loop - processes game logic each frame
+ * Handles scoring, difficulty scaling, day/night cycle, and entity updates
+ */
 function update() {
     if (gameState !== GAME_STATES.PLAYING) return;
     
@@ -1177,6 +1314,10 @@ function update() {
     spawnObstacle();
     spawnDustParticle();
     updateParticles();
+    
+    // Update bonus messages
+    bonusMessages = bonusMessages.filter(m => m.update());
+    
     checkCollisions();
 }
 
@@ -1215,6 +1356,14 @@ function checkOrientation() {
     }
 }
 
+// ============================================================================
+// === GAME LOOP ===
+// ============================================================================
+
+/**
+ * Main game loop - runs continuously while game is active
+ * Calls update and draw functions, then schedules next frame
+ */
 function gameLoop() {
     update();
     draw();
