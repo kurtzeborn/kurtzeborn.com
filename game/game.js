@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
 // CODE REVIEW: Always increment version number before making changes
 
-const VERSION = 'v0.17';
+const VERSION = 'v0.18';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -253,7 +253,7 @@ let billboards = [];
 const groundY = canvas.height - 80;
 
 // Sun/moon position (crosses sky as game progresses)
-let sunX = 100;
+let sunX = canvas.width - 100; // Start on right side
 let isNightMode = false;
 let previousNightMode = false; // Track for detecting transitions
 let pendingDayNightBonus = false; // Track bonus pending after transition completes
@@ -484,9 +484,9 @@ function isObstacleTooClose(obstacleArray) {
     const obstacleDistance = canvas.width - lastObstacleEnd;
     if (obstacleDistance < CONFIG.SAFE_DISTANCE_BIRD_VEHICLE) return true;
     
-    // Also check distance from last convoy if it extends further
+    // Also check distance from last convoy if it extends further (add extra spacing)
     const convoyDistance = canvas.width - lastConvoyEndX;
-    if (convoyDistance < CONFIG.SAFE_DISTANCE_BIRD_VEHICLE) return true;
+    if (convoyDistance < CONFIG.SAFE_DISTANCE_BIRD_VEHICLE + 200) return true;
     
     return false;
 }
@@ -652,7 +652,7 @@ function spawnConvoy(leadVehicle, minCount, maxCount) {
         const vehiclePalette = createSpritePalette(vehicleColors);
         
         // Position vehicles behind the lead vehicle with proper spacing
-        const spacing = 80 + (i * 100); // 80px after lead vehicle, then 100px between each
+        const spacing = 60 + (i * 60); // 60px after lead vehicle, then 60px between each
         const vehicleX = leadVehicle.x + leadVehicle.width + spacing;
         
         obstacles.push({
