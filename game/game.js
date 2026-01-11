@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
 // CODE REVIEW: Always increment version number before making changes
 
-const VERSION = 'v0.20';
+const VERSION = 'v0.21';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -657,7 +657,7 @@ function spawnConvoy(leadVehicle, minCount, maxCount) {
         const vehiclePalette = createSpritePalette(vehicleColors);
         
         // Position vehicles behind the previous vehicle with spacing
-        const spacing = 60; // Fixed spacing between each vehicle
+        const spacing = 30; // Fixed spacing between each vehicle
         const vehicleX = lastVehicleEndX + spacing;
         
         obstacles.push({
