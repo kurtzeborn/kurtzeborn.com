@@ -3,7 +3,9 @@
 Family sites automatically deployed to GitHub Pages and Azure Static Web Apps.
 
 **Live Sites:**
-- https://kurtzeborn.net (Azure - Main site)
+- https://kurtzeborn.com (Azure Static Web App)
+- https://kurtzeborn.org (Azure Static Web App)
+- https://kurtzeborn.net (Azure Static Web App)
 - https://kurtzeborn.net/game/ (Motorcycle Runner game)
 - https://scott.kurtzeborn.net (Personal profile and resume)
 - https://kurtzeborn.github.io/kurtzeborn.com/ (GitHub Pages mirror)
