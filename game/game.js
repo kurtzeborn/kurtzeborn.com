@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
 // CODE REVIEW: Always increment version number before making changes
 
-const VERSION = 'v0.21';
+const VERSION = 'v0.22';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -366,10 +366,10 @@ class BonusMessage {
     }
     
     draw() {
-        // Fade in during first 20% and fade out during last 20%
+        // Fade in during first 5% and fade out during last 95%
         let alpha = 1.0;
-        const fadeInTime = this.maxDuration * 0.2;
-        const fadeOutTime = this.maxDuration * 0.2;
+        const fadeInTime = this.maxDuration * 0.05;
+        const fadeOutTime = this.maxDuration * 0.95;
         
         if (this.maxDuration - this.duration < fadeInTime) {
             alpha = (this.maxDuration - this.duration) / fadeInTime;
