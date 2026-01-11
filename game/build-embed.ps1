@@ -32,6 +32,11 @@ foreach ($replacement in $replacements) {
     $processedGameContent = $processedGameContent.Replace($replacement[0], $replacement[1])
 }
 
+$processedGameContent = $gameContent
+foreach ($replacement in $replacements) {
+    $processedGameContent = $processedGameContent.Replace($replacement[0], $replacement[1])
+}
+
 # Build the embed file (inject raw content - no escaping needed since we're using direct injection)
 $embedContent = $templateContent `
     -replace '\$\{generateSpritesContent\(\)\}', $spritesContent `
@@ -55,9 +60,17 @@ $header = @"
 
 "@
 
-# Write output with header
-Set-Content -Path $OutputFile -Value ($header + $embedContent) -NoNewline
+# Write unminified version first
+$tempFile = Join-Path $GameDir "game-embed-temp.js"
+Set-Content -Path $tempFile -Value ($header + $embedContent) -NoNewline
+
+# Minify with esbuild
+Write-Host "Minifying with esbuild..." -ForegroundColor Cyan
+& esbuild $tempFile --minify --outfile=$OutputFile
+
+# Clean up temp file
+Remove-Item $tempFile
 
 $sizeKB = [Math]::Round((Get-Item $OutputFile).Length / 1024)
-Write-Host "✓ Built game-embed.js ($sizeKB KB)" -ForegroundColor Green
-Write-Host "✓ Output: $OutputFile" -ForegroundColor Green
+Write-Host "Built game-embed.js ($sizeKB KB)" -ForegroundColor Green
+Write-Host "Output: $OutputFile" -ForegroundColor Green
