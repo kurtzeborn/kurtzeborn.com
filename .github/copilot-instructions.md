@@ -12,7 +12,8 @@
    ```
 2. ✅ Increment by 0.1 (e.g., v0.6 → v0.7)
 3. ✅ Make your code changes
-4. ✅ Commit with version in message: `"v0.X: Description of changes"`
+4. ✅ **REGENERATE EMBED FILE** - Run `cd game; .\build-embed.ps1` to rebuild `game-embed.js`
+5. ✅ Commit with version in message: `"v0.X: Description of changes"`
 
 **This is the #1 item on the code review checklist and MUST NOT be skipped.**
 

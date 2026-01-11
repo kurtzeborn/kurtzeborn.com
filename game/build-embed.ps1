@@ -79,5 +79,5 @@ $header = @"
 Set-Content -Path $OutputFile -Value ($header + $embedContent) -NoNewline
 
 $sizeKB = [Math]::Round((Get-Item $OutputFile).Length / 1024)
-Write-Host "✓ Built game-embed.js ($sizeKB KB)" -ForegroundColor Green
-Write-Host "✓ Output: $OutputFile" -ForegroundColor Green
+Write-Host "Built game-embed.js ($sizeKB KB)" -ForegroundColor Green
+Write-Host "Output: $OutputFile" -ForegroundColor Green

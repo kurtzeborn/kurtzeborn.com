@@ -247,10 +247,8 @@
         
         // Embed sprites.js and game.js content inline
         (function() {
-            // Motorcycle Runner - Sprite Definitions
-// Pixel art sprites defined as 2D arrays with indexed colors
+            
 
-// Color constants - single source of truth for all game colors
 const COLORS = {
     TRANSPARENT: null,
     WHEEL: '#6a6a6a',
@@ -267,21 +265,18 @@ const COLORS = {
     TEXT: '#2d2d2d'
 };
 
-// Vehicle color palettes for randomization
 const VEHICLE_COLORS = [
-    { body: '#cc0000', detail: '#990000' }, // Red
-    { body: '#e8e8e8', detail: '#c0c0c0' }, // White/Light Gray
-    { body: '#8B4513', detail: '#654321' }, // Brown
-    { body: '#4169E1', detail: '#1E3A8A' }  // Blue
+    { body: '#cc0000', detail: '#990000' }, 
+    { body: '#e8e8e8', detail: '#c0c0c0' }, 
+    { body: '#8B4513', detail: '#654321' }, 
+    { body: '#4169E1', detail: '#1E3A8A' }  
 ];
 
-// Track last vehicle color to avoid repetition
 let lastVehicleColorIndex = -1;
 
-// Function to get random vehicle colors (avoids repeating the same color)
 function getRandomVehicleColors() {
     let colorIndex;
-    // If we have more than one color option, avoid repeating the last one
+    
     if (VEHICLE_COLORS.length > 1) {
         do {
             colorIndex = Math.floor(Math.random() * VEHICLE_COLORS.length);
@@ -293,28 +288,25 @@ function getRandomVehicleColors() {
     return VEHICLE_COLORS[colorIndex];
 }
 
-// Function to create sprite palette with vehicle colors
 function createSpritePalette(vehicleColors = { body: COLORS.VEHICLE_BODY, detail: COLORS.VEHICLE_DETAIL }) {
     return [
-        COLORS.TRANSPARENT,      // 0 - transparent
-        COLORS.WHEEL,            // 1 - wheels
-        COLORS.BODY,             // 2 - motorcycle body
-        vehicleColors.body,      // 3 - vehicle body (randomized)
-        COLORS.RIDER,            // 4 - rider body/gray
-        COLORS.HELMET,           // 5 - helmet red
-        COLORS.BIRD_BODY,        // 6 - bird body brown
-        COLORS.BIRD_WING,        // 7 - bird wings
-        vehicleColors.detail,    // 8 - vehicle details (randomized)
-        COLORS.VEHICLE_WINDOW    // 9 - vehicle windows (light blue)
+        COLORS.TRANSPARENT,      
+        COLORS.WHEEL,            
+        COLORS.BODY,             
+        vehicleColors.body,      
+        COLORS.RIDER,            
+        COLORS.HELMET,           
+        COLORS.BIRD_BODY,        
+        COLORS.BIRD_WING,        
+        vehicleColors.detail,    
+        COLORS.VEHICLE_WINDOW    
     ];
 }
 
-// Default sprite palette
 let SPRITE_PALETTE = createSpritePalette();
 
-// Pixel Art Sprites
 const SPRITES = {
-    // Motorcycle normal stance (20x16 pixels)
+    
     MOTORCYCLE_NORMAL: [
         [0,0,0,0,0,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0],
         [0,0,0,0,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0],
@@ -334,8 +326,7 @@ const SPRITES = {
         [0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0]
     ],
 
-    // Motorcycle ducking (20x12 pixels)
-    MOTORCYCLE_DUCK: [
+MOTORCYCLE_DUCK: [
         [0,0,0,0,0,0,5,5,5,0,0,0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,5,5,2,2,2,0,0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,5,5,5,2,2,0,0,0,0,0,0,0,0,0,0],
@@ -349,9 +340,8 @@ const SPRITES = {
         [1,1,2,1,1,0,0,0,0,0,2,2,0,0,0,1,1,2,1,1],
         [0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0]
     ],
-    
-    // Vehicle sprites (obstacles)
-    CAR: [
+
+CAR: [
         [0,0,0,0,0,0,8,8,8,8,8,0,0,0,0,0],
         [0,0,0,8,8,8,3,3,3,3,3,8,8,0,0,0],
         [0,0,0,9,3,9,9,3,9,9,9,3,9,0,0,0],
@@ -381,9 +371,8 @@ const SPRITES = {
         [1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
         [0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0],
     ],
-    // 1 - tire, 3 - vehicle body, 8 - vehicle detail, 9 - vehicle window
 
-    VAN: [
+VAN: [
         [0,0,0,0,0,0,8,8,8,8,8,8,8,8,8,8,8,8,8,8,0,0],
         [0,0,0,0,8,8,3,3,3,3,3,3,3,3,3,3,8,3,3,3,8,0],
         [0,0,0,9,3,9,9,9,3,3,3,3,3,3,3,8,3,9,9,3,3,8],
@@ -438,8 +427,7 @@ const SPRITES = {
         [0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0],
     ],
 
-    // Bird/Bat with wings up
-    BIRD_UP: [
+BIRD_UP: [
         [0,0,0,0,0,0,0,6,0,0,0,0],
         [0,0,0,0,6,6,6,6,0,0,0,0],
         [0,0,6,6,6,6,6,0,0,0,0,0],
@@ -448,9 +436,8 @@ const SPRITES = {
         [0,0,0,0,7,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0,0,0,0]
     ],
-    
-    // Bird/Bat with wings down
-    BIRD_DOWN: [
+
+BIRD_DOWN: [
         [0,0,0,0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0,0,0,0],
         [0,7,7,7,7,7,7,7,0,0,0,0],
@@ -459,9 +446,8 @@ const SPRITES = {
         [0,0,0,0,6,6,6,6,0,0,0,0],
         [0,0,0,0,0,0,0,6,0,0,0,0]
     ],
-    
-    // Billboard structure (text drawn separately) - 60x40 pixels
-    BILLBOARD: [
+
+BILLBOARD: [
         [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
         [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
         [2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
@@ -507,10 +493,9 @@ const SPRITES = {
 };
 
             
-            // Motorcycle Runner Game - Chrome T-Rex Style
-// CODE REVIEW: Always increment version number before making changes
+            
 
-const VERSION = 'v0.16';
+const VERSION = 'v0.17';
 
 const canvas = document.getElementById('motorcycle-runner-canvas');
 const ctx = canvas.getContext('2d');
@@ -522,55 +507,49 @@ const restartBtn = document.getElementById('motorcycle-restart-btn');
 const orientationOverlay = document.getElementById('motorcycle-orientation-overlay');
 const instructionsEl = document.getElementById('motorcycle-instructions');
 
-// Game configuration constants
 const CONFIG = {
-    // === GAME SPEED & DIFFICULTY ===
+    
     INITIAL_SPEED: 6,
     SPEED_INCREMENT: 0.5,
     SPEED_INCREASE_INTERVAL: 300,
-    
-    // === SCORING ===
-    SURVIVAL_POINTS_INTERVAL: 5, // Award 1 point every N frames
+
+SURVIVAL_POINTS_INTERVAL: 5, 
     VEHICLE_POINTS: 50,
     RIDEABLE_VEHICLE_POINTS: 100,
     FLYING_OBSTACLE_POINTS: 75,
     RIDEABLE_VEHICLE_MIN_SCORE: 300,
     FLYING_OBSTACLE_MIN_SCORE: 100,
-    
-    // === OBSTACLE SPAWNING - GROUND VEHICLES ===
-    OBSTACLE_MIN_INTERVAL: 60,
+    DAY_NIGHT_BONUS: 500,
+
+OBSTACLE_MIN_INTERVAL: 60,
     OBSTACLE_MAX_INTERVAL: 120,
     OBSTACLE_INTERVAL_DECREASE_RATE: 0.5,
     OBSTACLE_MIN_INTERVAL_CAP: 40,
     GROUND_INTERVAL_MIN_SPACING: 30,
     OBSTACLE_RETRY_DELAY: 20,
-    
-    // === OBSTACLE SPAWNING - FLYING (BIRDS) ===
-    FLYING_OBSTACLE_MIN_INTERVAL: 100,
+
+FLYING_OBSTACLE_MIN_INTERVAL: 100,
     FLYING_OBSTACLE_MAX_INTERVAL: 200,
     FLYING_OBSTACLE_SPEED_MULTIPLIER: 1.2,
     FLYING_INTERVAL_MIN_CAP: 60,
     FLYING_INTERVAL_MIN_SPACING: 50,
     BIRD_WING_FLAP_FRAME_INTERVAL: 10,
     SAFE_DISTANCE_BIRD_VEHICLE: 300,
-    
-    // === PLAYER PHYSICS ===
-    FAST_FALL_GRAVITY: 2.5, // Extra gravity when ducking mid-air
+
+FAST_FALL_GRAVITY: 2.5, 
     HITBOX_SIZE_RATIO: 0.7,
-    
-    // === VISUAL EFFECTS ===
-    SPRITE_SCALE: 3,
+
+SPRITE_SCALE: 3,
     PARTICLE_SPAWN_INTERVAL: 5,
     COLLISION_FLASH_DURATION: 10,
-    
-    // === GROUND RENDERING ===
-    GROUND_ROAD_WIDTH: 40,
+    BONUS_MESSAGE_DURATION: 300, 
+
+GROUND_ROAD_WIDTH: 40,
     GROUND_DASH_SPACING: 40,
     GROUND_DASH_LENGTH: 20,
     CENTER_LINE_WIDTH: 3,
-    
-    // === SKY & DAY/NIGHT CYCLE ===
-    SKY_DAY_COLOR: '#87CEEB',
+
+SKY_DAY_COLOR: '#87CEEB',
     SKY_NIGHT_COLOR: '#1a1a2e',
     SKY_TRANSITION_SPEED: 0.01,
     SUN_Y_POSITION: 60,
@@ -585,41 +564,34 @@ const CONFIG = {
     STAR_MAX_SPEED: 0.15,
     STAR_MIN_OPACITY: 0.5,
     STAR_MAX_OPACITY: 1.0,
-    
-    // === DEBUG ===
-    DEBUG_MODE: false // Set to true to see hitboxes
+
+DEBUG_MODE: false 
 };
 
-// Note: COLORS and SPRITE_PALETTE are defined in sprites.js
-
-// Sprite cache for performance
 const spriteCache = new Map();
 
 function getCachedSprite(sprite, scale = CONFIG.SPRITE_SCALE, flipH = false, palette = null) {
-    // Use custom palette if provided, otherwise use default
-    const usePalette = palette || SPRITE_PALETTE;
     
-    // Create unique cache key including flip state and palette hash
-    const paletteKey = palette ? palette[3] + palette[8] : 'default';
+    const usePalette = palette || SPRITE_PALETTE;
+
+const paletteKey = palette ? palette[3] + palette[8] : 'default';
     const key = sprite + '_' + scale + '_' + (flipH ? 'f' : 'n') + '_' + paletteKey;
     
     if (!spriteCache.has(key)) {
-        // Create offscreen canvas for this sprite
+        
         const width = sprite[0].length * scale;
         const height = sprite.length * scale;
         const offscreenCanvas = document.createElement('canvas');
         offscreenCanvas.width = width;
         offscreenCanvas.height = height;
         const offscreenCtx = offscreenCanvas.getContext('2d');
-        
-        // Apply horizontal flip if needed
-        if (flipH) {
+
+if (flipH) {
             offscreenCtx.translate(width, 0);
             offscreenCtx.scale(-1, 1);
         }
-        
-        // Draw sprite once to offscreen canvas
-        for (let row = 0; row < sprite.length; row++) {
+
+for (let row = 0; row < sprite.length; row++) {
             for (let col = 0; col < sprite[row].length; col++) {
                 const colorIndex = sprite[row][col];
                 if (colorIndex !== 0) {
@@ -640,13 +612,11 @@ function getCachedSprite(sprite, scale = CONFIG.SPRITE_SCALE, flipH = false, pal
     return spriteCache.get(key);
 }
 
-// Sprite rendering function - now uses cached sprites
 function drawSprite(sprite, x, y, scale = CONFIG.SPRITE_SCALE, flipH = false, palette = null) {
     const cachedSprite = getCachedSprite(sprite, scale, flipH, palette);
     ctx.drawImage(cachedSprite, Math.floor(x), Math.floor(y));
 }
 
-// Get sprite dimensions after scaling
 function getSpriteDimensions(sprite, scale = CONFIG.SPRITE_SCALE) {
     return {
         width: sprite[0].length * scale,
@@ -654,22 +624,19 @@ function getSpriteDimensions(sprite, scale = CONFIG.SPRITE_SCALE) {
     };
 }
 
-// Game state constants
 const GAME_STATES = {
     WAITING: 'waiting',
     PLAYING: 'playing',
     GAME_OVER: 'gameOver'
 };
 
-// Game state
 let gameState = GAME_STATES.WAITING;
 let score = 0;
-// CODE REVIEW: Always parseInt() localStorage values (they're strings)
+
 let highScore = parseInt(localStorage.getItem('motorcycleHighScore')) || 0;
 let dailyHighScore = 0;
 let allTimeHighScore = parseInt(localStorage.getItem('motorcycleAllTimeHighScore')) || 0;
 
-// Load daily high score (reset if it's a new day)
 function loadDailyHighScore() {
     const today = new Date().toDateString();
     const lastPlayDate = localStorage.getItem('motorcycleLastPlayDate');
@@ -677,7 +644,7 @@ function loadDailyHighScore() {
     if (lastPlayDate === today) {
         dailyHighScore = parseInt(localStorage.getItem('motorcycleDailyHighScore')) || 0;
     } else {
-        // New day, reset daily high score
+        
         dailyHighScore = 0;
         localStorage.setItem('motorcycleLastPlayDate', today);
         localStorage.setItem('motorcycleDailyHighScore', '0');
@@ -693,10 +660,9 @@ let nextGroundObstacleFrame = 0;
 let nextFlyingObstacleFrame = 0;
 let groundObstacleInterval = CONFIG.OBSTACLE_MAX_INTERVAL;
 let flyingObstacleInterval = CONFIG.FLYING_OBSTACLE_MAX_INTERVAL;
-let lastConvoyEndX = -1000; // Track the end position of the last convoy
-let nextBillboardFrame = 600; // First billboard at 10 seconds (600 frames at 60 FPS)
+let lastConvoyEndX = -1000; 
+let nextBillboardFrame = 600; 
 
-// Billboard messages
 const BILLBOARD_MESSAGES = [
     ['Eastside', 'Harley'],
     ['Emerald City', 'Harley'],
@@ -716,7 +682,6 @@ const BILLBOARD_MESSAGES = [
     ['DANGER', 'ZONE!']
 ];
 
-// Motorcycle object
 const motorcycle = {
     x: 50,
     y: canvas.height - 140,
@@ -732,9 +697,8 @@ const motorcycle = {
     ridingVehicle: null
 };
 
-// Obstacles array
 let obstacles = [];
-// Define obstacle types - dimensions are calculated from sprites automatically
+
 function getObstacleTypes() {
     return [
         { sprite: 'CAR', ...getSpriteDimensions(SPRITES.CAR), type: 'vehicle', rideable: false },
@@ -746,25 +710,22 @@ function getObstacleTypes() {
 }
 const obstacleTypes = getObstacleTypes();
 
-// Flying obstacles
 let flyingObstacles = [];
 const flyingObstacleConfig = {
     ...getSpriteDimensions(SPRITES.BIRD_UP),
-    heightVariations: [-140, -120, -100, -60, -40] // Mix of high (jump over) and low (duck under) birds
+    heightVariations: [-140, -120, -100, -60, -40] 
 };
 
-// Billboards
 let billboards = [];
 
-// Ground line
 const groundY = canvas.height - 80;
 
-// Sun/moon position (crosses sky as game progresses)
 let sunX = 100;
 let isNightMode = false;
-let skyTransition = 0; // 0 = day, 1 = night, crossfades between
+let previousNightMode = false; 
+let pendingDayNightBonus = false; 
+let skyTransition = 0; 
 
-// Sky color constants for easy reference
 const SKY_COLORS = {
     DAY: CONFIG.SKY_DAY_COLOR,
     NIGHT: CONFIG.SKY_NIGHT_COLOR,
@@ -781,13 +742,12 @@ const SKY_COLORS = {
     STAR: 'rgba(255, 255, 255, {opacity})'
 };
 
-// Stars for night mode
 let stars = [];
 
-// Particle system for visual effects
 let particles = [];
 
-// Interpolate between two hex colors
+let bonusMessages = [];
+
 function interpolateColor(color1, color2, factor) {
     const c1 = parseInt(color1.slice(1), 16);
     const c2 = parseInt(color2.slice(1), 16);
@@ -818,7 +778,7 @@ class Particle {
     update() {
         this.x += this.vx;
         this.y += this.vy;
-        this.vy += 0.1; // gravity
+        this.vy += 0.1; 
         this.life--;
         return this.life > 0;
     }
@@ -829,6 +789,47 @@ class Particle {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.size, this.size);
         ctx.globalAlpha = 1.0;
+    }
+}
+
+class BonusMessage {
+    constructor(text, x, y, duration = CONFIG.BONUS_MESSAGE_DURATION) {
+        this.text = text;
+        this.x = x;
+        this.y = y;
+        this.duration = duration;
+        this.maxDuration = duration;
+        this.vy = -0.5; 
+    }
+    
+    update() {
+        this.y += this.vy;
+        this.duration--;
+        return this.duration > 0;
+    }
+    
+    draw() {
+        
+        let alpha = 1.0;
+        const fadeInTime = this.maxDuration * 0.2;
+        const fadeOutTime = this.maxDuration * 0.2;
+        
+        if (this.maxDuration - this.duration < fadeInTime) {
+            alpha = (this.maxDuration - this.duration) / fadeInTime;
+        } else if (this.duration < fadeOutTime) {
+            alpha = this.duration / fadeOutTime;
+        }
+        
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.font = 'bold 48px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
+        ctx.fillText(this.text, this.x, this.y);
+        
+        ctx.restore();
     }
 }
 
@@ -857,10 +858,8 @@ function drawParticles() {
     particles.forEach(p => p.draw());
 }
 
-// Key state
 const keys = {};
 
-// Utility functions
 function getRandomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
@@ -883,7 +882,6 @@ function checkAABBCollision(rect1, rect2) {
            rect1.y + rect1.height > rect2.y;
 }
 
-// Cache hitbox dimensions
 const normalDims = getSpriteDimensions(SPRITES.MOTORCYCLE_NORMAL);
 const duckDims = getSpriteDimensions(SPRITES.MOTORCYCLE_DUCK);
 const normalHitbox = calculateHitbox(normalDims, CONFIG.HITBOX_SIZE_RATIO, 1, 4);
@@ -918,24 +916,21 @@ function isObstacleTooClose(obstacleArray) {
     if (obstacleArray.length === 0) return false;
     const lastObstacle = obstacleArray[obstacleArray.length - 1];
     const lastObstacleEnd = lastObstacle.x + lastObstacle.width;
-    
-    // Check distance from last obstacle
-    const obstacleDistance = canvas.width - lastObstacleEnd;
+
+const obstacleDistance = canvas.width - lastObstacleEnd;
     if (obstacleDistance < CONFIG.SAFE_DISTANCE_BIRD_VEHICLE) return true;
-    
-    // Also check distance from last convoy if it extends further
-    const convoyDistance = canvas.width - lastConvoyEndX;
+
+const convoyDistance = canvas.width - lastConvoyEndX;
     if (convoyDistance < CONFIG.SAFE_DISTANCE_BIRD_VEHICLE) return true;
     
     return false;
 }
 
-// CODE REVIEW: Game actions should be centralized functions (not duplicated in keyboard/touch)
 function performJump() {
     if (!motorcycle.isJumping && !motorcycle.isDucking) {
         motorcycle.velocityY = motorcycle.jumpPower;
         motorcycle.isJumping = true;
-        // Exit riding state when jumping
+        
         if (motorcycle.isRidingVehicle) {
             motorcycle.isRidingVehicle = false;
             motorcycle.ridingVehicle = null;
@@ -943,7 +938,6 @@ function performJump() {
     }
 }
 
-// Event listeners
 document.addEventListener('keydown', (e) => {
     keys[e.code] = true;
     
@@ -956,9 +950,8 @@ document.addEventListener('keydown', (e) => {
             performJump();
         }
     }
-    
-    // CODE REVIEW: Always preventDefault() for game input keys to avoid page scroll
-    if (['Space', 'ArrowUp', 'ArrowDown'].includes(e.code)) {
+
+if (['Space', 'ArrowUp', 'ArrowDown'].includes(e.code)) {
         e.preventDefault();
     }
 });
@@ -967,7 +960,6 @@ document.addEventListener('keyup', (e) => {
     keys[e.code] = false;
 });
 
-// Touch/Mobile support
 let isTouchDucking = false;
 
 canvas.addEventListener('touchstart', (e) => {
@@ -983,14 +975,13 @@ canvas.addEventListener('touchstart', (e) => {
         const canvasRect = canvas.getBoundingClientRect();
         const touchYRelative = touch.clientY - canvasRect.top;
         const canvasHalfHeight = canvasRect.height / 2;
-        
-        // Touch bottom half to duck, top half to jump
-        if (touchYRelative > canvasHalfHeight) {
-            // Duck - hold finger down (works on ground or mid-air for fast-fall)
+
+if (touchYRelative > canvasHalfHeight) {
+            
             isTouchDucking = true;
             keys['ArrowDown'] = true;
         } else {
-            // Jump - tap top half (reuses keyboard jump logic)
+            
             performJump();
         }
     }
@@ -998,7 +989,7 @@ canvas.addEventListener('touchstart', (e) => {
 
 canvas.addEventListener('touchend', (e) => {
     e.preventDefault();
-    // Release duck when finger is lifted
+    
     if (isTouchDucking) {
         keys['ArrowDown'] = false;
         isTouchDucking = false;
@@ -1012,22 +1003,22 @@ restartBtn.addEventListener('click', () => {
 });
 
 function startGame() {
-    // CODE REVIEW: Ensure ALL game state variables are reset here
-    // Check orientation on mobile before starting
-    if (!checkOrientation()) {
-        return; // Require landscape orientation on mobile devices
+
+if (!checkOrientation()) {
+        return; 
     }
     
     gameState = GAME_STATES.PLAYING;
     instructionsEl.style.display = 'none';
-    
-    // Dispatch custom event for embed wrapper to handle UI
-    window.dispatchEvent(new CustomEvent('motorcyclegamestart'));
+
+window.dispatchEvent(new CustomEvent('motorcyclegamestart'));
     
     score = 0;
     frameCount = 0;
     sunX = canvas.width - CONFIG.SUN_START_X;
     isNightMode = false;
+    previousNightMode = false;
+    pendingDayNightBonus = false;
     skyTransition = 0;
     stars = [];
     gameSpeed = CONFIG.INITIAL_SPEED;
@@ -1035,6 +1026,7 @@ function startGame() {
     flyingObstacles = [];
     billboards = [];
     particles = [];
+    bonusMessages = [];
     collisionFlash = 0;
     landingAnimation = 0;
     motorcycle.y = motorcycle.groundY;
@@ -1043,20 +1035,18 @@ function startGame() {
     motorcycle.isDucking = false;
     motorcycle.isRidingVehicle = false;
     motorcycle.ridingVehicle = null;
-    
-    // Reset spawn timers
-    nextGroundObstacleFrame = CONFIG.OBSTACLE_MAX_INTERVAL;
+
+nextGroundObstacleFrame = CONFIG.OBSTACLE_MAX_INTERVAL;
     nextFlyingObstacleFrame = CONFIG.FLYING_OBSTACLE_MAX_INTERVAL + CONFIG.FLYING_OBSTACLE_MIN_SCORE;
     groundObstacleInterval = CONFIG.OBSTACLE_MAX_INTERVAL;
     flyingObstacleInterval = CONFIG.FLYING_OBSTACLE_MAX_INTERVAL;
     lastConvoyEndX = -1000;
-    nextBillboardFrame = 900; // First billboard at 15 seconds
+    nextBillboardFrame = 900; 
     
     gameOverlay.style.display = 'none';
     gameLoop();
 }
 
-// Spawn convoy vehicles behind a lead vehicle
 function spawnConvoy(leadVehicle, minCount, maxCount) {
     const count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
     const smallVehicleTypes = obstacleTypes.filter(type => 
@@ -1069,9 +1059,8 @@ function spawnConvoy(leadVehicle, minCount, maxCount) {
         const vehicleType = getRandomElement(smallVehicleTypes);
         const vehicleColors = getRandomVehicleColors();
         const vehiclePalette = createSpritePalette(vehicleColors);
-        
-        // Position vehicles behind the lead vehicle with proper spacing
-        const spacing = 80 + (i * 100); // 80px after lead vehicle, then 100px between each
+
+const spacing = 80 + (i * 100); 
         const vehicleX = leadVehicle.x + leadVehicle.width + spacing;
         
         obstacles.push({
@@ -1088,23 +1077,22 @@ function spawnConvoy(leadVehicle, minCount, maxCount) {
         
         lastVehicleEndX = vehicleX + vehicleType.width;
     }
-    
-    // Track the end position of this convoy
-    lastConvoyEndX = lastVehicleEndX;
+
+lastConvoyEndX = lastVehicleEndX;
 }
 
 function spawnObstacle() {
-    // Spawn ground obstacle (vehicle) when it's time
+    
     if (frameCount >= nextGroundObstacleFrame) {
-        // Check if there's a recent flying obstacle that would create an impossible situation
+        
         if (!isObstacleTooClose(flyingObstacles)) {
-            // Separate rideable vs non-rideable vehicles based on score
+            
             let availableTypes = obstacleTypes;
             if (score >= CONFIG.RIDEABLE_VEHICLE_MIN_SCORE) {
-                // All vehicle types available
+                
                 availableTypes = obstacleTypes;
             } else {
-                // Only non-rideable vehicles
+                
                 availableTypes = obstacleTypes.filter(type => !type.rideable);
             }
             
@@ -1120,31 +1108,25 @@ function spawnObstacle() {
                 sprite: obstacleType.sprite,
                 type: obstacleType.type,
                 rideable: obstacleType.rideable,
-                flipH: false, // Vehicles always face left (coming towards motorcycle)
-                palette: vehiclePalette // Random vehicle color
+                flipH: false, 
+                palette: vehiclePalette 
             };
             
             obstacles.push(newObstacle);
-            
-            // Spawn convoy vehicles behind large vehicles based on playtime
-            const playTimeSeconds = frameCount / 60; // Assuming 60 FPS
-            
-            // After 15 seconds: spawn 1-2 vehicles behind semi trucks
-            // After 60 seconds: spawn up to 3 vehicles
-            if (playTimeSeconds >= 15 && obstacleType.sprite === 'SEMI_TRUCK') {
+
+const playTimeSeconds = frameCount / 60; 
+
+if (playTimeSeconds >= 15 && obstacleType.sprite === 'SEMI_TRUCK') {
                 const maxConvoySize = playTimeSeconds >= 60 ? 3 : 2;
                 spawnConvoy(newObstacle, 1, maxConvoySize);
             }
-            
-            // After 30 seconds: spawn 1-2 vehicles behind buses
-            // After 60 seconds: spawn up to 3 vehicles
-            if (playTimeSeconds >= 30 && obstacleType.sprite === 'BUS') {
+
+if (playTimeSeconds >= 30 && obstacleType.sprite === 'BUS') {
                 const maxConvoySize = playTimeSeconds >= 60 ? 3 : 2;
                 spawnConvoy(newObstacle, 1, maxConvoySize);
             }
-            
-            // Calculate next spawn time with progressive difficulty
-            groundObstacleInterval = calculateSpawnInterval(
+
+groundObstacleInterval = calculateSpawnInterval(
                 CONFIG.OBSTACLE_MIN_INTERVAL,
                 CONFIG.OBSTACLE_MAX_INTERVAL,
                 CONFIG.OBSTACLE_MIN_INTERVAL_CAP,
@@ -1152,14 +1134,13 @@ function spawnObstacle() {
             );
             nextGroundObstacleFrame = frameCount + groundObstacleInterval;
         } else {
-            // Retry soon if collision prevention blocked spawn
+            
             nextGroundObstacleFrame = frameCount + CONFIG.OBSTACLE_RETRY_DELAY;
         }
     }
-    
-    // Spawn flying obstacles after minimum score threshold
-    if (score > CONFIG.FLYING_OBSTACLE_MIN_SCORE && frameCount >= nextFlyingObstacleFrame) {
-        // Check if there's a recent ground obstacle that would create an impossible situation
+
+if (score > CONFIG.FLYING_OBSTACLE_MIN_SCORE && frameCount >= nextFlyingObstacleFrame) {
+        
         if (!isObstacleTooClose(obstacles)) {
             const yOffset = getRandomElement(flyingObstacleConfig.heightVariations);
             flyingObstacles.push({
@@ -1169,9 +1150,8 @@ function spawnObstacle() {
                 height: flyingObstacleConfig.height,
                 wingFrame: 0
             });
-            
-            // Calculate next spawn time with progressive difficulty
-            flyingObstacleInterval = calculateSpawnInterval(
+
+flyingObstacleInterval = calculateSpawnInterval(
                 CONFIG.FLYING_OBSTACLE_MIN_INTERVAL,
                 CONFIG.FLYING_OBSTACLE_MAX_INTERVAL,
                 CONFIG.FLYING_INTERVAL_MIN_CAP,
@@ -1179,158 +1159,141 @@ function spawnObstacle() {
             );
             nextFlyingObstacleFrame = frameCount + flyingObstacleInterval;
         } else {
-            // Retry soon if collision prevention blocked spawn
+            
             nextFlyingObstacleFrame = frameCount + CONFIG.OBSTACLE_RETRY_DELAY;
         }
     }
-    
-    // Spawn billboards every 15 seconds (900 frames)
-    if (frameCount >= nextBillboardFrame) {
+
+if (frameCount >= nextBillboardFrame) {
         const billboardDims = getSpriteDimensions(SPRITES.BILLBOARD);
         const message = BILLBOARD_MESSAGES[Math.floor(Math.random() * BILLBOARD_MESSAGES.length)];
         
         billboards.push({
             x: canvas.width,
-            y: groundY - billboardDims.height - 20, // 20px above ground
+            y: groundY - billboardDims.height - 20, 
             width: billboardDims.width,
             height: billboardDims.height,
             message: message
         });
         
-        nextBillboardFrame = frameCount + 900; // Next billboard in 15 seconds
+        nextBillboardFrame = frameCount + 900; 
     }
 }
 
 function updateObstacles() {
-    // Update ground obstacles (vehicles)
-    // Vehicles move slightly faster than road to appear traveling in opposite direction
-    const vehicleSpeed = gameSpeed * 1.3;
+
+const vehicleSpeed = gameSpeed * 1.3;
     for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].x -= vehicleSpeed;
-        
-        // Remove off-screen obstacles and award points
-        if (obstacles[i].x + obstacles[i].width < 0) {
+
+if (obstacles[i].x + obstacles[i].width < 0) {
             const points = obstacles[i].rideable ? CONFIG.RIDEABLE_VEHICLE_POINTS : CONFIG.VEHICLE_POINTS;
             obstacles.splice(i, 1);
             score += points;
         }
     }
-    
-    // Update flying obstacles
-    for (let i = flyingObstacles.length - 1; i >= 0; i--) {
+
+for (let i = flyingObstacles.length - 1; i >= 0; i--) {
         flyingObstacles[i].x -= gameSpeed * CONFIG.FLYING_OBSTACLE_SPEED_MULTIPLIER;
-        // Animate wing flapping
-        flyingObstacles[i].wingFrame = Math.floor(frameCount / CONFIG.BIRD_WING_FLAP_FRAME_INTERVAL) % 2;
         
-        // Remove off-screen obstacles
-        if (flyingObstacles[i].x + flyingObstacles[i].width < 0) {
+        flyingObstacles[i].wingFrame = Math.floor(frameCount / CONFIG.BIRD_WING_FLAP_FRAME_INTERVAL) % 2;
+
+if (flyingObstacles[i].x + flyingObstacles[i].width < 0) {
             flyingObstacles.splice(i, 1);
             score += CONFIG.FLYING_OBSTACLE_POINTS;
         }
     }
-    
-    // Update billboards (slower than road and vehicles)
-    for (let i = billboards.length - 1; i >= 0; i--) {
-        billboards[i].x -= gameSpeed * 0.7; // Slower than road and vehicles
-        
-        // Remove off-screen billboards
-        if (billboards[i].x + billboards[i].width < 0) {
+
+for (let i = billboards.length - 1; i >= 0; i--) {
+        billboards[i].x -= gameSpeed * 0.7; 
+
+if (billboards[i].x + billboards[i].width < 0) {
             billboards.splice(i, 1);
         }
     }
 }
 
 function updateMotorcycle() {
-    // Handle riding state
+    
     if (motorcycle.isRidingVehicle && motorcycle.ridingVehicle) {
         const vehicle = motorcycle.ridingVehicle;
-        
-        // Check if vehicle scrolled past motorcycle
-        if (vehicle.x + vehicle.width < motorcycle.x) {
-            // Fall off vehicle
+
+if (vehicle.x + vehicle.width < motorcycle.x) {
+            
             motorcycle.isRidingVehicle = false;
             motorcycle.ridingVehicle = null;
             motorcycle.isJumping = true;
-            motorcycle.velocityY = 0; // Start falling from current position
+            motorcycle.velocityY = 0; 
         } else {
-            // Lock motorcycle Y position to top of vehicle
-            const rideHeight = 1; // Minimal offset above vehicle
+            
+            const rideHeight = 1; 
             const currentHeight = motorcycle.isDucking ? motorcycle.duckHeight : motorcycle.normalHeight;
             motorcycle.y = vehicle.y - currentHeight - rideHeight;
-            
-            // Player can jump while riding
-            // (handled by handleJump function)
-        }
+
+}
     }
-    
-    // Handle ducking (only when not riding)
-    if (!motorcycle.isRidingVehicle && keys['ArrowDown'] && !motorcycle.isJumping) {
+
+if (!motorcycle.isRidingVehicle && keys['ArrowDown'] && !motorcycle.isJumping) {
         motorcycle.isDucking = true;
         motorcycle.y = motorcycle.groundY + (motorcycle.normalHeight - motorcycle.duckHeight);
     } else if (!motorcycle.isJumping && !motorcycle.isRidingVehicle) {
         motorcycle.isDucking = false;
         motorcycle.y = motorcycle.groundY;
     }
-    
-    // Apply gravity
-    if (motorcycle.isJumping) {
-        // Apply extra gravity for fast-fall when ducking mid-air
+
+if (motorcycle.isJumping) {
+        
         const gravityMultiplier = keys['ArrowDown'] ? CONFIG.FAST_FALL_GRAVITY : motorcycle.gravity;
         motorcycle.velocityY += gravityMultiplier;
         motorcycle.y += motorcycle.velocityY;
-        
-        // Land on ground
-        if (motorcycle.y >= motorcycle.groundY) {
+
+if (motorcycle.y >= motorcycle.groundY) {
             motorcycle.y = motorcycle.groundY;
             motorcycle.velocityY = 0;
             motorcycle.isJumping = false;
             motorcycle.isRidingVehicle = false;
             motorcycle.ridingVehicle = null;
-            landingAnimation = 8; // Show landing animation for 8 frames
+            landingAnimation = 8; 
         }
     }
-    
-    // Decrement landing animation counter
-    if (landingAnimation > 0) {
+
+if (landingAnimation > 0) {
         landingAnimation--;
     }
 }
 
 function checkCollisions() {
     const motorHitbox = getMotorcycleHitbox();
-    
-    // Check ground obstacles (vehicles)
-    for (let obstacle of obstacles) {
-        // Two-phase collision detection for rideable vehicles
+
+for (let obstacle of obstacles) {
+        
         if (obstacle.rideable) {
-            // Phase 1: Check if landing on top of rideable vehicle
+            
             const landingOnTop = 
                 motorcycle.isJumping && 
-                motorcycle.velocityY > 0 && // falling down
+                motorcycle.velocityY > 0 && 
                 motorHitbox.x + motorHitbox.width > obstacle.x && 
                 motorHitbox.x < obstacle.x + obstacle.width &&
-                motorHitbox.y + motorHitbox.height <= obstacle.y + 10 && // within 10px of top
-                motorHitbox.y + motorHitbox.height >= obstacle.y - 5; // above or slightly overlapping
+                motorHitbox.y + motorHitbox.height <= obstacle.y + 10 && 
+                motorHitbox.y + motorHitbox.height >= obstacle.y - 5; 
             
             if (landingOnTop) {
-                // Land on vehicle
+                
                 motorcycle.isRidingVehicle = true;
                 motorcycle.ridingVehicle = obstacle;
                 motorcycle.isJumping = false;
                 motorcycle.velocityY = 0;
-                continue; // Skip collision check
+                continue; 
             }
         }
-        
-        // Phase 2: Standard AABB collision for side/front impacts
-        if (!motorcycle.isRidingVehicle && checkAABBCollision(motorHitbox, obstacle)) {
+
+if (!motorcycle.isRidingVehicle && checkAABBCollision(motorHitbox, obstacle)) {
             gameOver();
             return;
         }
     }
-    
-    // Check flying obstacles
-    for (let obstacle of flyingObstacles) {
+
+for (let obstacle of flyingObstacles) {
         if (checkAABBCollision(motorHitbox, obstacle)) {
             gameOver();
             return;
@@ -1341,9 +1304,8 @@ function checkCollisions() {
 function gameOver() {
     gameState = GAME_STATES.GAME_OVER;
     collisionFlash = CONFIG.COLLISION_FLASH_DURATION;
-    
-    // Update high scores
-    if (score > highScore) {
+
+if (score > highScore) {
         highScore = score;
         localStorage.setItem('motorcycleHighScore', highScore);
     }
@@ -1362,28 +1324,25 @@ function gameOver() {
     dailyHighScoreEl.textContent = `Best Today: ${dailyHighScore}`;
     allTimeHighScoreEl.textContent = `Best Ever: ${allTimeHighScore}`;
     gameOverlay.style.display = 'block';
-    
-    // Dispatch custom event for embed wrapper to handle UI
-    window.dispatchEvent(new CustomEvent('motorcyclegameover'));
+
+window.dispatchEvent(new CustomEvent('motorcyclegameover'));
 }
 
 function drawMotorcycle() {
-    // Show landing animation (duck sprite for 5 frames), otherwise show normal state
+    
     const sprite = (motorcycle.isDucking || landingAnimation > 0) 
         ? SPRITES.MOTORCYCLE_DUCK 
         : SPRITES.MOTORCYCLE_NORMAL;
-    
-    // Adjust y position to align bottom of sprites
-    let drawY = motorcycle.y;
+
+let drawY = motorcycle.y;
     if (landingAnimation > 0 && !motorcycle.isDucking) {
-        // MOTORCYCLE_DUCK is shorter, so offset it down to align the bottom
+        
         const normalHeight = getSpriteDimensions(SPRITES.MOTORCYCLE_NORMAL).height;
         const duckHeight = getSpriteDimensions(SPRITES.MOTORCYCLE_DUCK).height;
         drawY += (normalHeight - duckHeight);
     }
-    
-    // Flash effect on collision
-    if (collisionFlash > 0) {
+
+if (collisionFlash > 0) {
         if (collisionFlash % 2 === 0) {
             ctx.globalAlpha = 0.3;
         }
@@ -1395,16 +1354,15 @@ function drawMotorcycle() {
 }
 
 function drawObstacles() {
-    // Draw ground obstacles (vehicle sprites)
+    
     obstacles.forEach(obstacle => {
         const sprite = SPRITES[obstacle.sprite];
         if (sprite) {
             drawSprite(sprite, obstacle.x, obstacle.y, CONFIG.SPRITE_SCALE, obstacle.flipH, obstacle.palette);
         }
     });
-    
-    // Draw flying obstacles (birds with wing animation)
-    flyingObstacles.forEach(obstacle => {
+
+flyingObstacles.forEach(obstacle => {
         const sprite = obstacle.wingFrame === 0 ? SPRITES.BIRD_UP : SPRITES.BIRD_DOWN;
         drawSprite(sprite, obstacle.x, obstacle.y);
     });
@@ -1412,21 +1370,19 @@ function drawObstacles() {
 
 function drawBillboards() {
     billboards.forEach(billboard => {
-        // Draw billboard sprite
-        drawSprite(SPRITES.BILLBOARD, billboard.x, billboard.y);
         
-        // Draw white background for text area to make it readable at night
-        ctx.fillStyle = '#f5f5f5';
-        const padding = 6; // Border width in pixels (scaled)
+        drawSprite(SPRITES.BILLBOARD, billboard.x, billboard.y);
+
+ctx.fillStyle = '#f5f5f5';
+        const padding = 6; 
         ctx.fillRect(
             billboard.x + padding, 
             billboard.y + padding, 
             billboard.width - (padding * 2), 
-            billboard.height - (padding * 2) - 30 // Exclude post area (10 pixels * 3 scale)
+            billboard.height - (padding * 2) - 30 
         );
-        
-        // Draw text on billboard
-        ctx.fillStyle = '#2d2d2d';
+
+ctx.fillStyle = '#2d2d2d';
         ctx.font = 'bold 23px Courier New';
         ctx.textAlign = 'center';
         
@@ -1434,14 +1390,14 @@ function drawBillboards() {
         const centerY = billboard.y + (billboard.height / 2);
         
         if (billboard.message.length === 1) {
-            // Single line - center vertically
+            
             ctx.fillText(billboard.message[0], centerX, centerY);
         } else if (billboard.message.length === 2) {
-            // Two lines - centered vertically
+            
             ctx.fillText(billboard.message[0], centerX, centerY - 12);
             ctx.fillText(billboard.message[1], centerX, centerY + 12);
         } else if (billboard.message.length === 3) {
-            // Three lines - evenly spaced
+            
             ctx.fillText(billboard.message[0], centerX, centerY - 18);
             ctx.fillText(billboard.message[1], centerX, centerY);
             ctx.fillText(billboard.message[2], centerX, centerY + 18);
@@ -1454,19 +1410,18 @@ function drawSkyObject() {
     const radius = CONFIG.SUN_RADIUS;
     
     if (isNightMode) {
-        // Draw crescent moon
+        
         ctx.fillStyle = SKY_COLORS.MOON;
         ctx.beginPath();
         ctx.arc(sunX, skyY, radius, 0, Math.PI * 2);
         ctx.fill();
-        
-        // Draw shadow to create crescent
-        ctx.fillStyle = interpolateColor(SKY_COLORS.DAY, SKY_COLORS.NIGHT, skyTransition);
+
+ctx.fillStyle = interpolateColor(SKY_COLORS.DAY, SKY_COLORS.NIGHT, skyTransition);
         ctx.beginPath();
         ctx.arc(sunX + CONFIG.MOON_CRESCENT_OFFSET, skyY, radius, 0, Math.PI * 2);
         ctx.fill();
     } else {
-        // Draw sun with glow
+        
         const gradient = ctx.createRadialGradient(sunX, skyY, radius * 0.3, sunX, skyY, radius * 2);
         gradient.addColorStop(0, SKY_COLORS.SUN_GLOW[0]);
         gradient.addColorStop(0.3, SKY_COLORS.SUN_GLOW[1]);
@@ -1477,9 +1432,8 @@ function drawSkyObject() {
         ctx.beginPath();
         ctx.arc(sunX, skyY, radius * 2, 0, Math.PI * 2);
         ctx.fill();
-        
-        // Draw sun core
-        ctx.fillStyle = SKY_COLORS.SUN_CORE;
+
+ctx.fillStyle = SKY_COLORS.SUN_CORE;
         ctx.beginPath();
         ctx.arc(sunX, skyY, radius, 0, Math.PI * 2);
         ctx.fill();
@@ -1499,41 +1453,52 @@ function drawStars() {
 
 function updateStars() {
     if (!isNightMode) return;
-    
-    // Move stars left at their individual speeds
-    stars.forEach(star => {
+
+stars.forEach(star => {
         star.x -= star.speed;
-        
-        // Wrap around when they go off screen
-        if (star.x < -10) {
+
+if (star.x < -10) {
             star.x = canvas.width + 10;
         }
     });
 }
 
 function updateDayNightCycle() {
-    // Move sun/moon across sky
-    sunX -= CONFIG.SUN_MOON_SPEED;
     
-    // Switch between day and night when sun/moon reaches left side
-    if (sunX <= CONFIG.SUN_START_X) {
+    sunX -= CONFIG.SUN_MOON_SPEED;
+
+if (sunX <= CONFIG.SUN_START_X) {
         isNightMode = !isNightMode;
         if (isNightMode) {
             initializeStars();
         }
         sunX = canvas.width - CONFIG.SUN_START_X;
+
+if (previousNightMode !== isNightMode && score > 0) {
+            pendingDayNightBonus = true;
+        }
+        
+        previousNightMode = isNightMode;
     }
-    
-    // Gradually transition sky color (crossfade)
-    const targetTransition = isNightMode ? 1 : 0;
+
+const targetTransition = isNightMode ? 1 : 0;
     if (skyTransition < targetTransition) {
         skyTransition = Math.min(skyTransition + CONFIG.SKY_TRANSITION_SPEED, targetTransition);
     } else if (skyTransition > targetTransition) {
         skyTransition = Math.max(skyTransition - CONFIG.SKY_TRANSITION_SPEED, targetTransition);
     }
-    
-    // Update stars during night
-    updateStars();
+
+if (pendingDayNightBonus && skyTransition === targetTransition) {
+        score += CONFIG.DAY_NIGHT_BONUS;
+
+const centerX = canvas.width / 2;
+        const centerY = groundY / 3; 
+        bonusMessages.push(new BonusMessage('Bonus +500', centerX, centerY));
+        
+        pendingDayNightBonus = false;
+    }
+
+updateStars();
 }
 
 function initializeStars() {
@@ -1550,16 +1515,15 @@ function initializeStars() {
 }
 
 function drawGround() {
-    // Draw road (wider black line)
+    
     ctx.strokeStyle = COLORS.GROUND_LINE;
     ctx.lineWidth = CONFIG.GROUND_ROAD_WIDTH;
     ctx.beginPath();
     ctx.moveTo(0, groundY);
     ctx.lineTo(canvas.width, groundY);
     ctx.stroke();
-    
-    // Draw center lane divider (white dashed line) - batched
-    ctx.strokeStyle = COLORS.CENTER_LINE;
+
+ctx.strokeStyle = COLORS.CENTER_LINE;
     ctx.lineWidth = CONFIG.CENTER_LINE_WIDTH;
     ctx.beginPath();
     const offset = (frameCount * gameSpeed) % CONFIG.GROUND_DASH_SPACING;
@@ -1571,21 +1535,18 @@ function drawGround() {
 }
 
 function drawScore() {
-    // Interpolate text color between dark and white based on sky transition
-    ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
     
-    // Main score - larger font, bold
-    ctx.font = 'bold 18px Courier New';
+    ctx.fillStyle = interpolateColor(SKY_COLORS.TEXT_DAY, SKY_COLORS.TEXT_NIGHT, skyTransition);
+
+ctx.font = 'bold 18px Courier New';
     ctx.textAlign = 'center';
     ctx.fillText(`Score: ${score}`, canvas.width / 2, 30);
-    
-    // Daily/all-time scores - 2/3 the size (12px), not bold
-    ctx.font = '12px Courier New';
+
+ctx.font = '12px Courier New';
     ctx.fillText(`Best Today: ${dailyHighScore}`, canvas.width / 2, 46);
     ctx.fillText(`Best Ever: ${allTimeHighScore}`, canvas.width / 2, 62);
-    
-    // Debug mode - show FPS and speed
-    if (CONFIG.DEBUG_MODE) {
+
+if (CONFIG.DEBUG_MODE) {
         ctx.font = 'bold 18px Courier New';
         ctx.textAlign = 'left';
         ctx.fillText(`Speed: ${gameSpeed.toFixed(1)}`, 20, 30);
@@ -1601,15 +1562,13 @@ function drawVersion() {
 
 function drawDebugHitboxes() {
     if (!CONFIG.DEBUG_MODE) return;
-    
-    // Draw motorcycle hitbox
-    const motorHitbox = getMotorcycleHitbox();
+
+const motorHitbox = getMotorcycleHitbox();
     ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
     ctx.lineWidth = 2;
     ctx.strokeRect(motorHitbox.x, motorHitbox.y, motorHitbox.width, motorHitbox.height);
-    
-    // Draw obstacle hitboxes
-    ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
+
+ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
     obstacles.forEach(obstacle => {
         ctx.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
     });
@@ -1624,37 +1583,36 @@ function drawWaitingScreen() {
     ctx.font = 'bold 32px Courier New';
     ctx.textAlign = 'center';
     ctx.fillText('Press SPACE to Start', canvas.width / 2, canvas.height / 2 - 50);
-    
-    // Draw version number in small font
-    ctx.font = '12px Courier New';
+
+ctx.font = '12px Courier New';
     ctx.fillText(VERSION, canvas.width / 2, canvas.height / 2 - 10);
-    
-    // Draw in correct order: ground first, then motorcycle on top
-    drawGround();
+
+drawGround();
     drawMotorcycle();
 }
 
 function draw() {
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw sky background with crossfade
-    ctx.fillStyle = interpolateColor(SKY_COLORS.DAY, SKY_COLORS.NIGHT, skyTransition);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+ctx.fillStyle = interpolateColor(SKY_COLORS.DAY, SKY_COLORS.NIGHT, skyTransition);
     ctx.fillRect(0, 0, canvas.width, groundY);
     
     if (gameState === GAME_STATES.WAITING) {
         drawWaitingScreen();
         return;
     }
-    
-    // CODE REVIEW: Draw order must be back-to-front (stars → sky → billboards → ground → particles → player → obstacles → UI)
-    drawStars();
+
+drawStars();
     drawSkyObject();
-    drawBillboards(); // Draw billboards before ground so they appear in background
+    drawBillboards(); 
     drawGround();
     drawParticles();
     drawMotorcycle();
     drawObstacles();
+
+bonusMessages.forEach(m => m.draw());
+    
     drawScore();
     drawVersion();
     drawDebugHitboxes();
@@ -1664,18 +1622,14 @@ function update() {
     if (gameState !== GAME_STATES.PLAYING) return;
     
     frameCount++;
-    
-    // Update day/night cycle
-    updateDayNightCycle();
-    
-    // Award 1 point for survival
-    if (frameCount % CONFIG.SURVIVAL_POINTS_INTERVAL === 0) {
+
+updateDayNightCycle();
+
+if (frameCount % CONFIG.SURVIVAL_POINTS_INTERVAL === 0) {
         score++;
     }
-    
-    // Increase difficulty over time
-    // After 30 seconds (1800 frames), slow speed increases by half
-    if (frameCount % CONFIG.SPEED_INCREASE_INTERVAL === 0) {
+
+if (frameCount % CONFIG.SPEED_INCREASE_INTERVAL === 0) {
         const playTimeSeconds = frameCount / 60;
         const speedIncrement = playTimeSeconds >= 30 ? CONFIG.SPEED_INCREMENT * 0.5 : CONFIG.SPEED_INCREMENT;
         gameSpeed += speedIncrement;
@@ -1686,26 +1640,27 @@ function update() {
     spawnObstacle();
     spawnDustParticle();
     updateParticles();
+
+bonusMessages = bonusMessages.filter(m => m.update());
+    
     checkCollisions();
 }
 
-// Orientation detection for mobile devices
 function isLandscape() {
-    // Check if it's a mobile device first
+    
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     if (!isMobile) {
-        return true; // Allow desktop play in any orientation
+        return true; 
     }
-    
-    // For mobile, check orientation
-    if (screen.orientation && screen.orientation.type) {
+
+if (screen.orientation && screen.orientation.type) {
         return screen.orientation.type.includes('landscape');
     } else if (window.orientation !== undefined) {
-        // Fallback for older browsers: 90 or -90 is landscape
+        
         return Math.abs(window.orientation) === 90;
     } else {
-        // Final fallback: check aspect ratio
+        
         return window.innerWidth > window.innerHeight;
     }
 }
@@ -1716,7 +1671,7 @@ function checkOrientation() {
         return true;
     } else {
         orientationOverlay.style.display = 'block';
-        // Pause the game if it was playing (orientation changed mid-game)
+        
         if (gameState === GAME_STATES.PLAYING) {
             gameState = GAME_STATES.WAITING;
         }
@@ -1733,10 +1688,8 @@ function gameLoop() {
     }
 }
 
-// Initial draw
 draw();
 
-// Check orientation on load and listen for changes
 checkOrientation();
 window.addEventListener('orientationchange', checkOrientation);
 window.addEventListener('resize', checkOrientation);
