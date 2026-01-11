@@ -1,7 +1,7 @@
 // Motorcycle Runner Game - Chrome T-Rex Style
 // CODE REVIEW: Always increment version number before making changes
 
-const VERSION = 'v0.18';
+const VERSION = 'v0.19';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -197,7 +197,7 @@ const BILLBOARD_MESSAGES = [
     ['Life is', 'short, roads', 'are long.'],
     ['Two wheels,', 'One love', '#BikerLife'],
     ['YOU GOT', 'THIS!'],
-    ['Eat.  Sleep.', 'Ride.', 'Repeat.'],
+    ['Eat. Sleep.', 'Ride.', 'Repeat.'],
     ['NICE', 'MOVES!'],
     ['LEGENDARY!'],
     ['STAY', 'FOCUSED!'],
@@ -349,13 +349,18 @@ class BonusMessage {
         this.text = text;
         this.x = x;
         this.y = y;
+        this.initialY = y;
         this.duration = duration;
         this.maxDuration = duration;
-        this.vy = -0.5; // Float upward slowly
+        this.vy = -0.3; // Float upward slowly
+        this.maxUpwardMovement = 40; // Maximum pixels to move up
     }
     
     update() {
-        this.y += this.vy;
+        // Only move up if we haven't reached the maximum upward movement
+        if (this.initialY - this.y < this.maxUpwardMovement) {
+            this.y += this.vy;
+        }
         this.duration--;
         return this.duration > 0;
     }
@@ -1026,9 +1031,12 @@ function drawBillboards() {
         ctx.fillStyle = '#2d2d2d';
         ctx.font = 'bold 23px Courier New';
         ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         
         const centerX = billboard.x + (billboard.width / 2);
-        const centerY = billboard.y + (billboard.height / 2);
+        // Center in the text area (excluding the post at bottom)
+        const textAreaHeight = billboard.height - 30; // Exclude post
+        const centerY = billboard.y + (textAreaHeight / 2);
         
         if (billboard.message.length === 1) {
             // Single line - center vertically
@@ -1043,6 +1051,8 @@ function drawBillboards() {
             ctx.fillText(billboard.message[1], centerX, centerY);
             ctx.fillText(billboard.message[2], centerX, centerY + 18);
         }
+        
+        ctx.textBaseline = 'alphabetic';
     });
 }
 
