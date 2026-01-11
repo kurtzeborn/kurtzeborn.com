@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'game/**'
       - 'scott.kurtzeborn.com/**'
@@ -31,9 +31,9 @@ jobs:
       - name: Switch to gh-pages branch
         run: git checkout gh-pages
         
-      - name: Update from master
+      - name: Update from main
         run: |
-          git checkout master -- game scott.kurtzeborn.com kurtzeborn.com
+          git checkout main -- game scott.kurtzeborn.com kurtzeborn.com
           
       - name: Check for changes
         id: check_changes
