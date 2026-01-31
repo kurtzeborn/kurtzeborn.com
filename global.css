@@ -27,6 +27,11 @@ body {
 	line-height: 1;
 	color: black;
 	background: black;
+	background-image: url("bg2.jpg");
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-attachment: fixed;
 }
 
 ol, ul {
@@ -111,10 +116,6 @@ h1 {
 	margin-bottom: .5em;
 }
 
-.background {
-	margin-top: -.5em;
-}
-
 .heading {
 	margin: .5em;
 	margin-left:3%;
@@ -171,11 +172,6 @@ h1 {
 	position: absolute;
 }
 
-.background {
-	position: fixed;
-	left: 0;
-}
-
 .nav {
 	top: 7.5em;
 }
@@ -194,17 +190,10 @@ h1 {
 	width: 27.5em;
 }
 
-.background {
-	min-width: 1500px;
-}
 /* Z-Index */
 
 .heading {
 	z-index: 5;
-}
-
-.background {
-	z-index: -1;
 }
 
 /* Align */
