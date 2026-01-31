@@ -2,43 +2,24 @@
 
 Family sites automatically deployed to GitHub Pages and Azure Static Web Apps.
 
-**Live Sites:**
-- https://kurtzeborn.com (Azure Static Web App)
-- https://kurtzeborn.org (Azure Static Web App)
-- https://kurtzeborn.net (Azure Static Web App)
-- https://kurtzeborn.net/game/ (Motorcycle Runner game)
-- https://scott.kurtzeborn.com (Azure Static Web App - Personal profile and resume)
-- https://scott.kurtzeborn.net (Azure Static Web App - Personal profile and resume)
-- https://kurtzeborn.github.io/kurtzeborn.com/ (GitHub Pages mirror)
+## Live Sites
 
-## How to Update the Sites
+| Site | Hosting | Description |
+|------|---------|-------------|
+| [kurtzeborn.net](https://kurtzeborn.net) | GitHub Pages | Source code landing page |
+| [kurtzeborn.com](https://kurtzeborn.com) | Azure Static Web App | Family domain landing page (.com & .org) |
+| [scott.kurtzeborn.com](https://scott.kurtzeborn.com) | Azure Static Web App | Personal profile and resume |
 
-Make changes on the `main` branch and push - everything deploys automatically:
+## Project Structure
 
-```bash
-git add .
-git commit -m "Your changes"
-git push origin main
+```
+kurtzeborn.com/
+├── kurtzeborn.net/
+├── kurtzeborn.com/    
+├── scott.kurtzeborn.com/
+└── .github/workflows/
 ```
 
-GitHub Actions will automatically:
-- Deploy to GitHub Pages (gh-pages branch)
-- Deploy to Azure Static Web Apps
+## How to Update
 
-Changes are live within a few minutes.
-
-## Project Contents
-
-### Motorcycle Runner (`game/`)
-A browser-based endless runner game inspired by Chrome's T-Rex game. Built with vanilla JavaScript and HTML5 Canvas.
-
-**Features:**
-- Embeddable on any website with one line: `<script src="https://kurtzeborn.net/game/game-embed.js"></script>`
-- Press SPACEBAR to launch game overlay
-- Works on mobile and desktop
-
-**Documentation:** See [game/README.md](game/README.md) and [game/CONTRIBUTING.md](game/CONTRIBUTING.md)
-
-### Family Sites
-- **kurtzeborn.com/** - Family domain landing page
-- **scott.kurtzeborn.com/** - Personal profile and resume
+Make changes on the `main` branch and push.  GitHub Actions will automatically deploy to the appropriate hosting platforms. Changes are live within a few minutes.
