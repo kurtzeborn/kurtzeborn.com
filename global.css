@@ -41,21 +41,21 @@ ol, ul {
 /* Borders */
 
 h1, .content, .content-border, .nav {
-	border: solid black 4px;
+	border: solid #4a4a4a 4px;
 }
 
 /* Colors */
 
 .content a {
-	color: darkslategray;
+	color: #b8860b;
 }
 
 a:focus, a:hover {
-	background-color: rgba(210, 255, 0, 0.50);
+	background-color: rgba(255, 215, 0, 0.35);
 }
 
 .nav a {
-	color: black;
+	color: #4a4a4a;
 }
 
 h1 {
@@ -63,16 +63,16 @@ h1 {
 }
 
 .content {
-	background-color: lightgoldenrodyellow;
+	background-color: #f5f5f5;
 }
 
 .content-border {
-	background-color: darkgoldenrod;
-	opacity: 0.8;
+	background-color: #5a5a5a;
+	opacity: 0.9;
 }
 
 .heading {
-	background-color: darkkhaki;
+	background-color: #d4a017;
 }
 
 .content-border h2 {
