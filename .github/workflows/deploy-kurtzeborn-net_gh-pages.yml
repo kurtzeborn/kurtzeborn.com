@@ -5,9 +5,9 @@ on:
     branches:
       - main
     paths:
-      - 'game/**'
       - 'scott.kurtzeborn.com/**'
       - 'kurtzeborn.com/**'
+      - 'index.html'
   workflow_dispatch:
 
 permissions:
@@ -33,7 +33,7 @@ jobs:
         
       - name: Update from main
         run: |
-          git checkout main -- game scott.kurtzeborn.com kurtzeborn.com
+          git checkout main -- scott.kurtzeborn.com kurtzeborn.com index.html
           
       - name: Check for changes
         id: check_changes
@@ -47,6 +47,6 @@ jobs:
       - name: Commit and push changes
         if: steps.check_changes.outputs.changes == 'true'
         run: |
-          git add game scott.kurtzeborn.com kurtzeborn.com
+          git add scott.kurtzeborn.com kurtzeborn.com index.html
           git commit -m "Auto-deploy from master (commit ${{ github.sha }})"
           git push origin gh-pages
