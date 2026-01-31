@@ -1,8 +1,8 @@
 # kurtzeborn.com
 
-![net](https://github.com/kurtzeborn/kurtzeborn.com/actions/workflows/deploy-kurtzeborn-net_gh-pages.yml/badge.svg)
-![com/org](https://github.com/kurtzeborn/kurtzeborn.com/actions/workflows/azure-static-web-apps-green-bush-07b3b521e.yml/badge.svg)
-![scott](https://github.com/kurtzeborn/kurtzeborn.com/actions/workflows/azure-static-web-apps-mango-mud-0289f001e.yml/badge.svg)
+![net](https://github.com/kurtzeborn/kurtzeborn.com/actions/workflows/deploy-kurtzeborn-net_gh-pages.yml/badge.svg?label=net)
+![com/org](https://github.com/kurtzeborn/kurtzeborn.com/actions/workflows/azure-static-web-apps-green-bush-07b3b521e.yml/badge.svg?label=com/org)
+![scott](https://github.com/kurtzeborn/kurtzeborn.com/actions/workflows/azure-static-web-apps-mango-mud-0289f001e.yml/badge.svg?label=scott)
 
 Family sites automatically deployed to GitHub Pages and Azure Static Web Apps.
 
