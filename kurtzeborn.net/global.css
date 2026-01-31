@@ -1,0 +1,206 @@
+﻿/* Reset Styles */
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: normal;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: eurostile, sans-serif;
+	vertical-align: baseline;
+}
+
+:focus {
+	outline: 0;
+}
+
+body {
+	line-height: 1;
+	color: black;
+	background: black;
+	background-image: url("bg2.jpg");
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-attachment: fixed;
+}
+
+ol, ul {
+	list-style: none;
+}
+
+/* Borders */
+
+h1, .content, .content-border, .nav {
+	border: solid #4a4a4a 4px;
+}
+
+/* Colors */
+
+.content a {
+	color: #b8860b;
+}
+
+a:focus, a:hover {
+	background-color: rgba(255, 215, 0, 0.35);
+}
+
+.nav a {
+	color: #4a4a4a;
+}
+
+h1 {
+	color: white;
+}
+
+.content {
+	background-color: #f5f5f5;
+}
+
+.content-border {
+	background-color: #5a5a5a;
+	opacity: 0.9;
+}
+
+.heading {
+	background-color: #d4a017;
+}
+
+.content-border h2 {
+	color: white;
+}
+
+.nav {
+	background-color: white;
+	opacity: 0.9;
+	word-wrap: break-word;
+}
+
+/* Float */
+.heading {
+	float: left;
+}
+
+/* Font Size */
+
+h1 {
+	font-size: 400%;
+}
+
+.content ul li.copyright {
+	font-size: 63.5%;
+}
+
+.copyright {
+	font-size: 63.5%;
+}
+
+.nav ul li {
+	font-size: 112.5%;
+}
+
+/* Margin */
+
+.content-border {
+	margin-left: 7%;
+	margin-top: .5em;
+	margin-bottom: .5em;
+}
+
+.heading {
+	margin: .5em;
+	margin-left:3%;
+}
+
+.nav, .nav ul li ul {
+	margin-left: 1em;
+}
+
+.content-border h2 {
+	margin-top: -.5em;
+}
+
+/* Padding */
+
+.content-border, .content, .nav, .content ul {
+	padding: 1em;
+}
+
+.content {
+	clear:both;
+}
+
+.heading h1 {
+	padding: .2em;
+}
+
+.nav ul {
+	padding-bottom: 1em;
+}
+
+.nav li {
+	padding-bottom: .5em;
+}
+
+.nav ul.nav-wrap {
+	padding-bottom: 0em;
+}
+
+.content-border h2 {
+	padding-right: 1em;
+}
+
+.content p {
+	padding-bottom: 1em;
+}
+/* Position */
+
+.heading, .content {
+	position: relative;
+}
+
+.nav {
+	position: absolute;
+}
+
+.nav {
+	top: 7.5em;
+}
+/* Text Align */
+
+.content-border h2 {
+	text-align: left;
+}
+
+/* Width */
+.content {
+	width: 25em;
+}
+
+.content-border {
+	width: 27.5em;
+}
+
+/* Z-Index */
+
+.heading {
+	z-index: 5;
+}
+
+/* Align */
+.heading h1 {
+	text-align: center;
+}
+
+.copyright {
+	float: right;
+}

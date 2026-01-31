@@ -5,9 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'kurtzeborn.com/global.css'
-      - 'kurtzeborn.com/bg5.jpg'
-      - 'index.html'
+      - 'kurtzeborn.net/**'
   workflow_dispatch:
 
 permissions:
@@ -33,12 +31,9 @@ jobs:
         
       - name: Update from main
         run: |
-          git checkout main -- index.html
-          git checkout main -- kurtzeborn.com/global.css
-          git checkout main -- kurtzeborn.com/bg5.jpg
-          mv kurtzeborn.com/global.css global.css
-          mv kurtzeborn.com/bg5.jpg bg5.jpg
-          rm -rf kurtzeborn.com
+          git checkout main -- kurtzeborn.net/
+          mv kurtzeborn.net/* .
+          rm -rf kurtzeborn.net
           
       - name: Check for changes
         id: check_changes
@@ -52,6 +47,6 @@ jobs:
       - name: Commit and push changes
         if: steps.check_changes.outputs.changes == 'true'
         run: |
-          git add index.html global.css bg5.jpg
+          git add -A
           git commit -m "Auto-deploy from master (commit ${{ github.sha }})"
           git push origin gh-pages
